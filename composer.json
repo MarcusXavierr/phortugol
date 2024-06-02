@@ -1,0 +1,11 @@
+{
+    "name": "toyjs/toyjs",
+    "description": "A simple toy language interpreter written in PHP",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Toyjs\\Toyjs\\": "src/"
+        }
+    },
+    "require": {}
+}
