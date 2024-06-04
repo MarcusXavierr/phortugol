@@ -1,4 +1,4 @@
-# ToyJS, a toy JavaScript interpreter written in PHP
+# ToyJS, a simple JavaScript interpreter written in PHP
 
 This is a toy JavaScript interpreter written in PHP. It is not complete and not fully compliant with the ECMAScript standard. It is intended for educational purposes only.
 
