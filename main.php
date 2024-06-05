@@ -49,7 +49,7 @@ class Main {
         $fileContent = file_get_contents($path);
         $this->run($fileContent);
 
-        if ($this->hadError) {
+        if ($this->error->hadError) {
             exit(65);
         }
     }
