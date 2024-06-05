@@ -4,11 +4,8 @@ namespace Toyjs\Toyjs\Scanner;
 
 use Toyjs\Toyjs\Enums\TokenType;
 use Toyjs\Toyjs\Helpers\ErrorHelper;
-use Toyjs\Toyjs\Helpers\ScannerKeywords;
-use Toyjs\Toyjs\Helpers\StringHelper;
 use Toyjs\Toyjs\Token;
 
-// TODO: Add tests for this class and then refactor it
 class Scanner
 {
     private readonly string $source;
@@ -17,11 +14,13 @@ class Scanner
     private int $current = 0;
     private int $line = 1;
     private ErrorHelper $error;
+    private LiteralsScanner $literalsScanner;
 
     public function __construct(string $source, ErrorHelper $errorHelper)
     {
         $this->source = $source;
         $this->error = $errorHelper;
+        $this->literalsScanner = new LiteralsScanner($source, $errorHelper);
     }
 
     /**
@@ -63,11 +62,13 @@ class Scanner
             '<' => $this->addToken($this->match('=') ? TokenType::LESS_EQUAL: TokenType::LESS),
             '!' => $this->addToken($this->match('=') ? TokenType::BANG_EQUAL: TokenType::BANG),
 
+            '&' => $this->addToken($this->match('&') ? TokenType::AND: TokenType::IDENTIFIER),
+            '|' => $this->addToken($this->match('|') ? TokenType::OR: TokenType::IDENTIFIER),
             //special cases
-            '\n' => (fn () => $this->line++),
-            ' ' => (function(){}), // do nothing
-            '\t' => (function(){}), // do nothing
-            '\r' => (function(){}), // do nothing
+            "\n" => (fn () => $this->line++),
+            " " => (function(){}), // do nothing
+            "\t" => (function(){}), // do nothing
+            "\r" => (function(){}), // do nothing
 
             // TODO: Add support for multiline comments
             // Maybe it's a comment
@@ -97,56 +98,27 @@ class Scanner
 
     private function string(string $stringSeparator): void
     {
-        while($this->peek() != $stringSeparator && !$this->isAtEnd()) {
-            if ($this->peek() == '\n') {
-                $this->line++;
-            }
-            $this->current++;
+        [$this->current, $token] = $this->literalsScanner->string($this->start, $this->current, $stringSeparator);
+        if ($token) {
+            $this->tokens[] = $token;
         }
-
-        if ($this->isAtEnd()) {
-            $this->error->report($this->line, "End of string expected.");
-            return;
-        }
-
-        // the closing "
-        $this->current++;
-        $literal = StringHelper::substring($this->source, $this->start + 1, $this->current - 1);
-        $lexeme = StringHelper::substring($this->source, $this->start, $this->current);
-        $this->tokens[] = new Token(TokenType::STRING, $literal, $lexeme, $this->line);
     }
 
     private function number(): void
     {
-        $currentIsDigit = fn() => ctype_digit($this->peek());
-
-        while ($currentIsDigit()) $this->advance();
-
-        // If number is 3.1415, match the numbers after '.' too
-        if ($this->match('.') && $currentIsDigit()) {
-            while ($currentIsDigit()) $this->advance();
-        }
-
-        $lexeme = StringHelper::substring($this->source, $this->start, $this->current);
-        $num = floatval($lexeme);
-        $this->tokens[] = new Token(TokenType::NUMBER, $num, $lexeme, $this->line);
+        [$this->current, $token] = $this->literalsScanner->number($this->start, $this->current);
+        $this->tokens[] = $token;
     }
 
     private function identifier(): void
     {
-        while(ctype_alnum($this->peek()) || $this->peek() == '_') {
-            $this->advance();
-        }
-
-        // TODO: Validate why console.log returns IDENTIFIER IDENTIFIER DOT instead of IDENTIFIER DOT IDENTIFIER
-        $lexeme = StringHelper::substring($this->source, $this->start, $this->current);
-        $kind = ScannerKeywords::KEYWORDS[$lexeme] ?? TokenType::IDENTIFIER;
-        $this->tokens[] = new Token($kind, null, $lexeme, $this->line);
+        [$this->current, $token] = $this->literalsScanner->identifier($this->start, $this->current);
+        $this->tokens[] = $token;
     }
 
     private function singleLineComment(): void
     {
-        while(!$this->isAtEnd() && $this->peek() != '\n') {
+        while(!$this->isAtEnd() && $this->peek() != "\n") {
             // Advance until comment is gone
             $this->advance();
         }
