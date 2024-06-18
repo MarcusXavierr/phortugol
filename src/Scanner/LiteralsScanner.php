@@ -21,7 +21,7 @@ class LiteralsScanner
     }
 
     /**
-     * @return array<int, Token>
+     * @return array{int, ?Token}
      */
     public function string(int $start, int $current, string $delimiter): array
     {
@@ -49,7 +49,7 @@ class LiteralsScanner
         ];
     }
     /**
-     * @return array<int,array<int, Token>>
+     * @return array{int, Token}
      */
     public function number(int $start, int $current): array
     {
@@ -76,7 +76,7 @@ class LiteralsScanner
         ];
     }
     /**
-     * @return array<int,mixed>
+     * @return array{int, Token}
      */
     public function identifier(int $start, int $current): array
     {

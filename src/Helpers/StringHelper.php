@@ -8,10 +8,6 @@ class StringHelper
     {
         $length = $end - $start;
         $result = substr($source, $start, $length);
-        if ($result === false) {
-            return "";
-        } else {
-            return $result;
-        }
+        return $result ?: '';
     }
 }

@@ -9,6 +9,7 @@ use Toyjs\Toyjs\Token;
 class Scanner
 {
     private readonly string $source;
+    /** @var Token[] */
     private array $tokens = [];
     private int $start = 0;
     private int $current = 0;
@@ -100,20 +101,20 @@ class Scanner
     {
         [$this->current, $token] = $this->literalsScanner->string($this->start, $this->current, $stringSeparator);
         if ($token) {
-            $this->tokens[] = $token;
+            array_push($this->tokens, $token);
         }
     }
 
     private function number(): void
     {
         [$this->current, $token] = $this->literalsScanner->number($this->start, $this->current);
-        $this->tokens[] = $token;
+        array_push($this->tokens, $token);
     }
 
     private function identifier(): void
     {
         [$this->current, $token] = $this->literalsScanner->identifier($this->start, $this->current);
-        $this->tokens[] = $token;
+        array_push($this->tokens, $token);
     }
 
     private function singleLineComment(): void

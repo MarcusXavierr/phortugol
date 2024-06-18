@@ -27,7 +27,7 @@ class ScannerTest extends TestCase
 
     /**
      * @dataProvider possibleStatements
-    * * @param array<int,mixed> $expectedLexemes
+     * @param string[] $expectedLexemes
      */
     public function test_scan_token_successfully(string $source, int $expectedCount, array $expectedLexemes): void
     {
@@ -42,16 +42,12 @@ class ScannerTest extends TestCase
             array_map(fn($token) => $token->lexeme, $tokens)
         );
     }
+
     /**
-     * @return array<int,array<string,mixed>>
+     * @return array<string, mixed[]>
      */
     public static function possibleStatements(): array
     {
-        // [
-        // "source",
-        // "expected count of tokens",
-        // "expected lexemes"
-        // ]
         return [
             "should parse simple statement" => [
                 "const a = 1 + 2;",
