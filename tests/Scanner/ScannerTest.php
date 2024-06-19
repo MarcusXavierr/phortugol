@@ -3,6 +3,7 @@
 namespace Tests\Scanner;
 
 use PHPUnit\Framework\TestCase;
+use Toyjs\Toyjs\Enums\TokenType;
 use Toyjs\Toyjs\Helpers\ErrorHelper;
 use Toyjs\Toyjs\Scanner\Scanner;
 
@@ -12,14 +13,14 @@ class ScannerTest extends TestCase
     {
         $error = new ErrorHelper();
         $source = "
-        const a = 'Hello World;
+        var a = 'Hello World;
         ";
 
         $scanner = new Scanner($source, $error);
         $scanner->scanTokens();
         $this->assertTrue($error->hadError);
 
-        $source = "let b = \"Goodbye World;'";
+        $source = "var b = \"Goodbye World;'";
         $scanner = new Scanner($source, $error);
         $scanner->scanTokens();
         $this->assertTrue($error->hadError);
@@ -28,8 +29,9 @@ class ScannerTest extends TestCase
     /**
      * @dataProvider possibleStatements
      * @param string[] $expectedLexemes
+     * @param TokenType[] $expectedKinds
      */
-    public function test_scan_token_successfully(string $source, int $expectedCount, array $expectedLexemes): void
+    public function test_scan_token_successfully(string $source, int $expectedCount, array $expectedLexemes, array $expectedKinds): void
     {
         $error = new ErrorHelper();
         $scanner = new Scanner($source, $error);
@@ -41,6 +43,10 @@ class ScannerTest extends TestCase
             $expectedLexemes,
             array_map(fn($token) => $token->lexeme, $tokens)
         );
+
+        foreach ($tokens as $index => $token) {
+            $this->assertEquals($expectedKinds[$index], $token->kind);
+        }
     }
 
     /**
@@ -50,24 +56,47 @@ class ScannerTest extends TestCase
     {
         return [
             "should parse simple statement" => [
-                "const a = 1 + 2;",
+                "var a = 1 + 2;",
                 8,
-                ["const", "a", "=", "1", "+", "2", ";", ""]
+                ["var", "a", "=", "1", "+", "2", ";", ""],
+                [
+                    TokenType::VAR, TokenType::IDENTIFIER,
+                    TokenType::EQUAL, TokenType::NUMBER,
+                    TokenType::PLUS, TokenType::NUMBER,
+                    TokenType::SEMICOLON, TokenType::EOF
+                ]
             ],
 
             "should parse simple statement with both string types" => [
-                "const a = 'Hello World'; let b = \"Goodbye World\";",
+                "var a = 'Hello World'; var b = \"Goodbye World\";",
                 11,
-                ["const", "a", "=", "'Hello World'", ";", "let", "b", "=", "\"Goodbye World\"", ";", ""]
+                ["var", "a", "=", "'Hello World'", ";", "var", "b", "=", "\"Goodbye World\"", ";", ""],
+                [
+                    TokenType::VAR, TokenType::IDENTIFIER,
+                    TokenType::EQUAL, TokenType::STRING,
+                    TokenType::SEMICOLON, TokenType::VAR, TokenType::IDENTIFIER,
+                    TokenType::EQUAL, TokenType::STRING,
+                    TokenType::SEMICOLON, TokenType::EOF
+                ]
             ],
 
-            "should parse simple statement with function" => [
-                "function add(a, b) {
-                return a + b;
+            "should parse simple statement with funcao" => [
+                "funcao add(a, b) {
+                retorne a + b;
                 }
                 ",
                 15,
-                ["function", "add", "(", "a", ",", "b", ")", "{", "return", "a", "+", "b", ";", "}", ""]
+                ["funcao", "add", "(", "a", ",", "b", ")", "{", "retorne", "a", "+", "b", ";", "}", ""],
+                [
+                    TokenType::FUNCTION, TokenType::IDENTIFIER,
+                    TokenType::LEFT_PAREN, TokenType::IDENTIFIER,
+                    TokenType::COMMA, TokenType::IDENTIFIER,
+                    TokenType::RIGHT_PAREN, TokenType::LEFT_BRACE,
+                    TokenType::RETURN, TokenType::IDENTIFIER,
+                    TokenType::PLUS, TokenType::IDENTIFIER,
+                    TokenType::SEMICOLON, TokenType::RIGHT_BRACE,
+                    TokenType::EOF
+                ]
             ],
 
             "should parse simple statement with comments" => [
@@ -75,10 +104,16 @@ class ScannerTest extends TestCase
                 // Comments should be ignored
                 // empty spaces too
 
-                const a = (1 + 2);
+                var a = (1 + 2);
                 ",
                 10,
-                ["const", "a", "=", "(", "1", "+", "2", ")", ";", ""]
+                ["var", "a", "=", "(", "1", "+", "2", ")", ";", ""],
+                [
+                    TokenType::VAR, TokenType::IDENTIFIER,
+                    TokenType::EQUAL, TokenType::LEFT_PAREN, TokenType::NUMBER,
+                    TokenType::PLUS, TokenType::NUMBER, TokenType::RIGHT_PAREN,
+                    TokenType::SEMICOLON, TokenType::EOF
+                ]
             ],
 
             "should parse complex math operations" => [
@@ -86,7 +121,16 @@ class ScannerTest extends TestCase
                 var a = 1.5 % 2 * 3 / (4 - 5);
                 ",
                 16,
-                ["var", "a", "=", "1.5", "%", "2", "*", "3", "/", "(", "4", "-", "5", ")", ";", ""]
+                ["var", "a", "=", "1.5", "%", "2", "*", "3", "/", "(", "4", "-", "5", ")", ";", ""],
+                [
+                    TokenType::VAR, TokenType::IDENTIFIER,
+                    TokenType::EQUAL, TokenType::NUMBER,
+                    TokenType::MODULO, TokenType::NUMBER,
+                    TokenType::STAR, TokenType::NUMBER,
+                    TokenType::SLASH, TokenType::LEFT_PAREN, TokenType::NUMBER,
+                    TokenType::MINUS, TokenType::NUMBER, TokenType::RIGHT_PAREN,
+                    TokenType::SEMICOLON, TokenType::EOF
+                ]
             ],
 
             "should parse ++ and -- operations" => [
@@ -96,18 +140,38 @@ class ScannerTest extends TestCase
                 a--;
                 ",
                 12,
-                ["var", "a", "=", "1", ";", "a", "++", ";", "a", "--", ";", ""]
+                ["var", "a", "=", "1", ";", "a", "++", ";", "a", "--", ";", ""],
+                [
+                    TokenType::VAR, TokenType::IDENTIFIER,
+                    TokenType::EQUAL, TokenType::NUMBER,
+                    TokenType::SEMICOLON,
+
+                    TokenType::IDENTIFIER, TokenType::PLUS_PLUS, TokenType::SEMICOLON,
+                    TokenType::IDENTIFIER, TokenType::MINUS_MINUS, TokenType::SEMICOLON,
+                    TokenType::EOF
+                ]
             ],
 
             "should parse boolean operations" => [
                 "
-                var a = true && false || true;
-                if (a) {
-                return a;
+                var a = verdadeiro E falso OU verdadeiro;
+                se (a) {
+                retorne a;
                 }
                 ",
                 19,
-                ["var", "a", "=", "true", "&&", "false", "||", "true", ";", "if", "(", "a", ")", "{", "return", "a", ";", "}", ""]
+                ["var", "a", "=", "verdadeiro", "E", "falso", "OU", "verdadeiro", ";", "se", "(", "a", ")", "{", "retorne", "a", ";", "}", ""],
+                [
+                    TokenType::VAR, TokenType::IDENTIFIER,
+                    TokenType::EQUAL, TokenType::TRUE,
+                    TokenType::AND, TokenType::FALSE,
+                    TokenType::OR, TokenType::TRUE,
+                    TokenType::SEMICOLON, TokenType::IF, TokenType::LEFT_PAREN, TokenType::IDENTIFIER,
+                    TokenType::RIGHT_PAREN, TokenType::LEFT_BRACE,
+                    TokenType::RETURN, TokenType::IDENTIFIER,
+                    TokenType::SEMICOLON, TokenType::RIGHT_BRACE,
+                    TokenType::EOF
+                ]
             ],
         ];
     }
