@@ -1,0 +1,8 @@
+// TODO: Isso é um comentário.
+funcao fib(n) {
+    se (n == 0) OU (n == 1) {
+        retorne 0;
+    } senao {
+        retorne fib(n - 1) + fib(n - 2);
+    }
+}
