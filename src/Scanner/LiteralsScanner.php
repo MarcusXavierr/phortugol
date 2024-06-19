@@ -60,7 +60,7 @@ class LiteralsScanner
         }
 
         // Look for a fractional part.
-        if ($this->source[$current] === '.' && $currentIsDigit($current + 1)) {
+        if (!$this->isAtEnd($current) && $this->source[$current] === '.' && $currentIsDigit($current + 1)) {
             $current++;
 
             while ($currentIsDigit($current)) {

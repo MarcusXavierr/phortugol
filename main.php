@@ -8,7 +8,9 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
 }
 
 use Toyjs\Toyjs\Helpers\ErrorHelper;
+use Toyjs\Toyjs\Parser\Parser;
 use \Toyjs\Toyjs\Scanner\Scanner;
+use \Toyjs\Toyjs\Helpers\AstPrinter;
 
 class Main {
     private ErrorHelper $error;
@@ -58,13 +60,16 @@ class Main {
     {
         $scanner = new Scanner($source, $this->error);
         $tokens = $scanner->scanTokens();
+        $parser = new Parser($this->error, $tokens);
+        $expr = $parser->parse();
+
         if ($this->error->hadError) {
             return;
         }
 
-        foreach ($tokens as $token) {
-            echo $token->toString() . PHP_EOL;
-        }
+        $printer = new AstPrinter();
+        echo $printer->print($expr) . PHP_EOL;
+
     }
 }
 
