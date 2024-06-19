@@ -66,10 +66,6 @@ class Main {
             echo $token->toString() . PHP_EOL;
         }
     }
-
-    public static function error(int $line, string $message): void
-    {
-    }
 }
 
 $main = new Main();
