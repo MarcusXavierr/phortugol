@@ -19,12 +19,12 @@ enum TokenType: string
     case IDENTIFIER = 'identifier'; case STRING = 'string'; case NUMBER = 'number';
 
     // Language keywords
-    case IF = 'if'; case ELSE = 'else'; case TRUE = 'true'; case FALSE = 'false';
-    case AND = '&&'; case OR = '||'; case FOR = 'for'; case WHILE = 'while';
-    case BREAK = 'break'; case CONTINUE = 'continue';
-    case VAR = 'var'; case LET = 'let'; case CONST = 'const';
-    case FUNCTION = 'function'; case RETURN = 'return';
-    case NULL = 'null'; case UNDEFINED = 'undefined';
+    case IF = 'se'; case ELSE = 'senao'; case TRUE = 'verdadeiro'; case FALSE = 'falso';
+    case AND = '&&'; case OR = '||'; case FOR = 'para'; case WHILE = 'enquanto';
+    case BREAK = 'pare'; case CONTINUE = 'continue';
+    case VAR = 'var';
+    case FUNCTION = 'funcao'; case RETURN = 'retorne';
+    case NULL = 'nulo'; case UNDEFINED = 'indefinido';
 
     case EOF = '\0';
 }
