@@ -43,6 +43,11 @@ class Scanner
     {
         $char = $this->advance();
 
+        if ($char == "\n") {
+            $this->line++;
+            return;
+        }
+
         match($char) {
             // Single char token
             '(' => $this->addToken(TokenType::LEFT_PAREN),
@@ -65,8 +70,8 @@ class Scanner
 
             '&' => $this->addToken($this->match('&') ? TokenType::AND: TokenType::IDENTIFIER),
             '|' => $this->addToken($this->match('|') ? TokenType::OR: TokenType::IDENTIFIER),
+
             //special cases
-            "\n" => (fn () => $this->line++),
             " " => (function(){}), // do nothing
             "\t" => (function(){}), // do nothing
             "\r" => (function(){}), // do nothing
