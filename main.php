@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+
 if (file_exists(__DIR__ . '/../../autoload.php')) {
     require __DIR__ . '/../../autoload.php';
 } else {
@@ -8,15 +9,17 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
 }
 
 use Toyjs\Toyjs\Helpers\ErrorHelper;
+use Toyjs\Toyjs\Interpreter\Interpreter;
 use Toyjs\Toyjs\Parser\Parser;
 use \Toyjs\Toyjs\Scanner\Scanner;
-use \Toyjs\Toyjs\Helpers\AstPrinter;
 
 class Main {
     private ErrorHelper $error;
+    private readonly Interpreter $interpreter;
     public function __construct()
     {
         $this->error = new ErrorHelper();
+        $this->interpreter = new Interpreter($this->error);
     }
     /**
      * @param array<int,mixed> $argv
@@ -54,6 +57,10 @@ class Main {
         if ($this->error->hadError) {
             exit(65);
         }
+
+        if ($this->error->hadRuntimeError) {
+            exit(70);
+        }
     }
 
     private function run(string $source): void
@@ -67,9 +74,7 @@ class Main {
             return;
         }
 
-        $printer = new AstPrinter();
-        echo $printer->print($expr) . PHP_EOL;
-
+        $this->interpreter->interpret($expr);
     }
 }
 
