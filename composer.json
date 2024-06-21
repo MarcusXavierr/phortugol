@@ -1,5 +1,5 @@
 {
-    "name": "toyjs/toyjs",
+    "name": "phortugol/phortugol",
     "description": "A simple toy language interpreter written in PHP",
     "license": "MIT",
     "autoload": {
