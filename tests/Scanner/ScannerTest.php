@@ -9,7 +9,7 @@ use Phortugol\Scanner\Scanner;
 
 class ScannerTest extends TestCase
 {
-    public function test_parse_string_with_error(): void
+    public function test_scan_string_with_error(): void
     {
         $error = new ErrorHelper();
         $source = "
@@ -55,7 +55,7 @@ class ScannerTest extends TestCase
     public static function possibleStatements(): array
     {
         return [
-            "should parse simple statement" => [
+            "should scan simple statement" => [
                 "var a = 1 + 2;",
                 8,
                 ["var", "a", "=", "1", "+", "2", ";", ""],
@@ -67,7 +67,7 @@ class ScannerTest extends TestCase
                 ]
             ],
 
-            "should parse simple statement with both string types" => [
+            "should scan simple statement with both string types" => [
                 "var a = 'Hello World'; var b = \"Goodbye World\";",
                 11,
                 ["var", "a", "=", "'Hello World'", ";", "var", "b", "=", "\"Goodbye World\"", ";", ""],
@@ -80,7 +80,7 @@ class ScannerTest extends TestCase
                 ]
             ],
 
-            "should parse simple statement with funcao" => [
+            "should scan simple statement with funcao" => [
                 "funcao add(a, b) {
                 retorne a + b;
                 }
@@ -99,7 +99,7 @@ class ScannerTest extends TestCase
                 ]
             ],
 
-            "should parse simple statement with comments" => [
+            "should scan simple statement with comments" => [
                 "
                 // Comments should be ignored
                 // empty spaces too
@@ -116,7 +116,7 @@ class ScannerTest extends TestCase
                 ]
             ],
 
-            "should parse complex math operations" => [
+            "should scan complex math operations" => [
                 "
                 var a = 1.5 % 2 * 3 / (4 - 5);
                 ",
@@ -133,7 +133,7 @@ class ScannerTest extends TestCase
                 ]
             ],
 
-            "should parse ++ and -- operations" => [
+            "should scan ++ and -- operations" => [
                 "
                 var a = 1;
                 a++;
@@ -152,7 +152,7 @@ class ScannerTest extends TestCase
                 ]
             ],
 
-            "should parse boolean operations" => [
+            "should scan boolean operations" => [
                 "
                 var a = verdadeiro E falso OU verdadeiro;
                 se (a) {
