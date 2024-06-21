@@ -1,12 +1,12 @@
 <?php
 
-namespace Toyjs\Toyjs\Scanner;
+namespace Phortugol\Scanner;
 
-use Toyjs\Toyjs\Enums\TokenType;
-use Toyjs\Toyjs\Helpers\ErrorHelper;
-use Toyjs\Toyjs\Helpers\ScannerKeywords;
-use Toyjs\Toyjs\Helpers\StringHelper;
-use Toyjs\Toyjs\Token;
+use Phortugol\Enums\TokenType;
+use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Helpers\ScannerKeywords;
+use Phortugol\Helpers\StringHelper;
+use Phortugol\Token;
 
 class LiteralsScanner
 {
@@ -21,7 +21,7 @@ class LiteralsScanner
     }
 
     /**
-     * @return array<int, Token>
+     * @return array{int, ?Token}
      */
     public function string(int $start, int $current, string $delimiter): array
     {
@@ -49,7 +49,7 @@ class LiteralsScanner
         ];
     }
     /**
-     * @return array<int,array<int, Token>>
+     * @return array{int, Token}
      */
     public function number(int $start, int $current): array
     {
@@ -60,7 +60,7 @@ class LiteralsScanner
         }
 
         // Look for a fractional part.
-        if ($this->source[$current] === '.' && $currentIsDigit($current + 1)) {
+        if (!$this->isAtEnd($current) && $this->source[$current] === '.' && $currentIsDigit($current + 1)) {
             $current++;
 
             while ($currentIsDigit($current)) {
@@ -76,7 +76,7 @@ class LiteralsScanner
         ];
     }
     /**
-     * @return array<int,mixed>
+     * @return array{int, Token}
      */
     public function identifier(int $start, int $current): array
     {

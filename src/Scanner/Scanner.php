@@ -1,14 +1,15 @@
 <?php
 
-namespace Toyjs\Toyjs\Scanner;
+namespace Phortugol\Scanner;
 
-use Toyjs\Toyjs\Enums\TokenType;
-use Toyjs\Toyjs\Helpers\ErrorHelper;
-use Toyjs\Toyjs\Token;
+use Phortugol\Enums\TokenType;
+use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Token;
 
 class Scanner
 {
     private readonly string $source;
+    /** @var Token[] */
     private array $tokens = [];
     private int $start = 0;
     private int $current = 0;
@@ -42,6 +43,11 @@ class Scanner
     {
         $char = $this->advance();
 
+        if ($char == "\n") {
+            $this->line++;
+            return;
+        }
+
         match($char) {
             // Single char token
             '(' => $this->addToken(TokenType::LEFT_PAREN),
@@ -53,6 +59,8 @@ class Scanner
             '.' => $this->addToken(TokenType::DOT),
             ';' => $this->addToken(TokenType::SEMICOLON),
             '%' => $this->addToken(TokenType::MODULO),
+            '?' => $this->addToken(TokenType::QUESTION),
+            ':' => $this->addToken(TokenType::COLON),
 
             // One or two char tokens
             '+' => $this->addToken($this->match('+') ? TokenType::PLUS_PLUS: TokenType::PLUS),
@@ -64,8 +72,8 @@ class Scanner
 
             '&' => $this->addToken($this->match('&') ? TokenType::AND: TokenType::IDENTIFIER),
             '|' => $this->addToken($this->match('|') ? TokenType::OR: TokenType::IDENTIFIER),
+
             //special cases
-            "\n" => (fn () => $this->line++),
             " " => (function(){}), // do nothing
             "\t" => (function(){}), // do nothing
             "\r" => (function(){}), // do nothing
@@ -100,20 +108,20 @@ class Scanner
     {
         [$this->current, $token] = $this->literalsScanner->string($this->start, $this->current, $stringSeparator);
         if ($token) {
-            $this->tokens[] = $token;
+            array_push($this->tokens, $token);
         }
     }
 
     private function number(): void
     {
         [$this->current, $token] = $this->literalsScanner->number($this->start, $this->current);
-        $this->tokens[] = $token;
+        array_push($this->tokens, $token);
     }
 
     private function identifier(): void
     {
         [$this->current, $token] = $this->literalsScanner->identifier($this->start, $this->current);
-        $this->tokens[] = $token;
+        array_push($this->tokens, $token);
     }
 
     private function singleLineComment(): void

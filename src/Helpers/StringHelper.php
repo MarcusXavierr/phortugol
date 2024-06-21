@@ -1,6 +1,6 @@
 <?php
 
-namespace Toyjs\Toyjs\Helpers;
+namespace Phortugol\Helpers;
 
 class StringHelper
 {
@@ -8,10 +8,6 @@ class StringHelper
     {
         $length = $end - $start;
         $result = substr($source, $start, $length);
-        if ($result === false) {
-            return "";
-        } else {
-            return $result;
-        }
+        return $result ?: '';
     }
 }

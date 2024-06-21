@@ -1,6 +1,6 @@
 <?php
 
-namespace Toyjs\Toyjs\Enums;
+namespace Phortugol\Enums;
 
 enum TokenType: string
 {
@@ -11,6 +11,8 @@ enum TokenType: string
     case SLASH = '/'; case STAR = '*'; case MINUS = '-'; case PLUS = '+';
     case BANG = '!'; case GREATER = '>'; case LESS = '<'; case EQUAL = '='; case MODULO = '%';
 
+    case QUESTION = '?'; case COLON = ':';
+
     // two character tokens.
     case BANG_EQUAL = '!='; case EQUAL_EQUAL = '=='; case GREATER_EQUAL = '>='; case LESS_EQUAL = '<=';
     case PLUS_PLUS = '++'; case MINUS_MINUS = '--';
@@ -19,12 +21,13 @@ enum TokenType: string
     case IDENTIFIER = 'identifier'; case STRING = 'string'; case NUMBER = 'number';
 
     // Language keywords
-    case IF = 'if'; case ELSE = 'else'; case TRUE = 'true'; case FALSE = 'false';
-    case AND = '&&'; case OR = '||'; case FOR = 'for'; case WHILE = 'while';
-    case BREAK = 'break'; case CONTINUE = 'continue';
-    case VAR = 'var'; case LET = 'let'; case CONST = 'const';
-    case FUNCTION = 'function'; case RETURN = 'return';
-    case NULL = 'null'; case UNDEFINED = 'undefined';
+    case IF = 'se'; case ELSE = 'senao'; case TRUE = 'verdadeiro'; case FALSE = 'falso';
+    case AND = '&&'; case OR = '||'; case FOR = 'para'; case WHILE = 'enquanto';
+    case BREAK = 'pare'; case CONTINUE = 'continue';
+    case VAR = 'var';
+    case FUNCTION = 'funcao'; case RETURN = 'retorne';
+    case NULL = 'nulo'; case UNDEFINED = 'indefinido';
 
+    case PRINT = 'escreva';
     case EOF = '\0';
 }
