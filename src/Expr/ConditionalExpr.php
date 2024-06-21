@@ -2,7 +2,7 @@
 
 namespace Phortugol\Expr;
 
-class ConditionalExpr extends  Expr
+class ConditionalExpr extends Expr
 {
     public function __construct(
         public readonly Expr $condition,

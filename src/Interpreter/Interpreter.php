@@ -2,7 +2,6 @@
 
 namespace Phortugol\Interpreter;
 
-use PHPUnit\Runner\ErrorHandler;
 use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\BinaryExpr;
@@ -13,7 +12,6 @@ use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Helpers\ErrorHelper;
-use Phortugol\Token;
 
 /**
  * @extends ExprHandler<mixed>
@@ -21,10 +19,12 @@ use Phortugol\Token;
 class Interpreter extends ExprHandler
 {
     private readonly ErrorHelper $errorHelper;
+    private readonly TypeValidator $typeValidator;
 
     public function __construct(ErrorHelper $errorHelper)
     {
         $this->errorHelper = $errorHelper;
+        $this->typeValidator = new TypeValidator();
     }
 
     public function interpret(Expr $expr): void
@@ -43,24 +43,27 @@ class Interpreter extends ExprHandler
         }
     }
 
-    // TODO: Create a function to validate the operand type based on TokenType
-    public function handleBinary(BinaryExpr $expr): mixed
+    protected function handleBinary(BinaryExpr $expr): mixed
     {
         $left = $this->handle($expr->left);
         $right = $this->handle($expr->right);
 
+        if ($this->typeValidator->shouldBeNumeric($expr->token->kind)) {
+            $this->typeValidator->validateIsNumber($expr->token, $left, $right);
+        }
+
+        // TODO: maybe I can break this switch into functions
         switch($expr->token->kind) {
             case TokenType::MINUS:
-                validateIsNumber($expr->token, $left, $right);
                 return $left - $right;
             case TokenType::STAR:
-                validateIsNumber($expr->token, $left, $right);
                 return $left * $right;
             case TokenType::MODULO:
-                validateIsNumber($expr->token, $left, $right);
                 return $left % $right;
             case TokenType::SLASH:
-                validateIsNumber($expr->token, $left, $right);
+                if ($right == 0) {
+                    throw new RuntimeError($expr->token, "O divisor deve ser diferente de zero");
+                }
                 return $left / $right;
             case TokenType::PLUS:
                 if (is_string($left) && is_string($right)) {
@@ -70,26 +73,24 @@ class Interpreter extends ExprHandler
                     return $left + $right;
                 }
                 throw new RuntimeError($expr->token, "Os operandos precisam ser ambos números ou strings");
-                break;
 
+            // Logical operators
             case TokenType::AND:
                 return $left && $right;
             case TokenType::OR:
                 return $left || $right;
 
+            // Comparison operators
             case TokenType::GREATER:
-                validateIsNumber($expr->token, $left, $right);
                 return $left > $right;
             case TokenType::GREATER_EQUAL:
-                validateIsNumber($expr->token, $left, $right);
                 return $left >= $right;
             case TokenType::LESS:
-                validateIsNumber($expr->token, $left, $right);
                 return $left < $right;
             case TokenType::LESS_EQUAL:
-                validateIsNumber($expr->token, $left, $right);
                 return $left <= $right;
 
+            // Equality operators
             case TokenType::EQUAL_EQUAL:
                 return $left == $right;
             case TokenType::BANG_EQUAL:
@@ -99,12 +100,12 @@ class Interpreter extends ExprHandler
         return null;
     }
 
-    public function handleUnary(UnaryExpr $expr): mixed
+    protected function handleUnary(UnaryExpr $expr): mixed
     {
         $result = $this->handle($expr->right);
         switch($expr->token->kind) {
             case TokenType::MINUS:
-                validateIsNumber($expr->token, $result);
+                $this->typeValidator->validateIsNumber($expr->token, $result);
                 return -$result;
             case TokenType::BANG:
                 return !$result;
@@ -113,17 +114,17 @@ class Interpreter extends ExprHandler
         return null;
     }
 
-    public function handleGrouping(GroupingExpr $expr): mixed
+    protected function handleGrouping(GroupingExpr $expr): mixed
     {
         return $this->handle($expr->expression);
     }
 
-    public function handleLiteral(LiteralExpr $expr): mixed
+    protected function handleLiteral(LiteralExpr $expr): mixed
     {
         return $expr->value;
     }
 
-    public function handleConditional(ConditionalExpr $expr): mixed
+    protected function handleConditional(ConditionalExpr $expr): mixed
     {
         $condition = $this->handle($expr->condition);
         if ($condition) {
@@ -133,13 +134,4 @@ class Interpreter extends ExprHandler
         return $this->handle($expr->falseExpr);
     }
 
-}
-
-function validateIsNumber(Token $operand, mixed ...$values): void
-{
-    foreach ($values as $value) {
-        if (!is_numeric($value)) {
-            throw new RuntimeError($operand, "O operador '{$operand->lexeme}' espera um número");
-        }
-    }
 }

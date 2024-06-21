@@ -27,25 +27,25 @@ abstract class ExprHandler
     /**
      * @return T
      */
-    public abstract function handleBinary(BinaryExpr $expr);
+    protected abstract function handleBinary(BinaryExpr $expr);
 
     /**
      * @return T
      */
-    public abstract function handleUnary(UnaryExpr $expr);
+    protected abstract function handleUnary(UnaryExpr $expr);
 
     /**
      * @return T
      */
-    public abstract function handleLiteral(LiteralExpr $expr);
+    protected abstract function handleLiteral(LiteralExpr $expr);
 
     /**
      * @return T
      */
-    public abstract function handleGrouping(GroupingExpr $expr);
+    protected abstract function handleGrouping(GroupingExpr $expr);
 
     /**
      * @return T
      */
-    public abstract function handleConditional(ConditionalExpr $expr);
+    protected abstract function handleConditional(ConditionalExpr $expr);
 }

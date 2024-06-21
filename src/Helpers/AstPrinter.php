@@ -19,24 +19,24 @@ class AstPrinter extends ExprHandler
        return $this->handle($expression);
     }
 
-    public function handleBinary(BinaryExpr $expr): string {
+    protected function handleBinary(BinaryExpr $expr): string {
         return $this->parenthesize($expr->token->lexeme, $expr->left, $expr->right);
     }
 
-    public function handleUnary(UnaryExpr $expr): string {
+    protected function handleUnary(UnaryExpr $expr): string {
         return $this->parenthesize($expr->token->lexeme, $expr->right);
     }
 
-    public function handleLiteral(LiteralExpr $expr): string {
+    protected function handleLiteral(LiteralExpr $expr): string {
         if ($expr->value === null) return "nulo";
         return $expr->value;
     }
 
-    public function handleGrouping(GroupingExpr $expr): string {
+    protected function handleGrouping(GroupingExpr $expr): string {
         return $this->handle($expr->expression);
     }
 
-    public function handleConditional(ConditionalExpr $expr): string {
+    protected function handleConditional(ConditionalExpr $expr): string {
         return $this->parenthesize("if", $expr->condition, $expr->trueExpr, $expr->falseExpr);
     }
 
