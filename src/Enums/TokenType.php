@@ -1,6 +1,6 @@
 <?php
 
-namespace Toyjs\Toyjs\Enums;
+namespace Phortugol\Enums;
 
 enum TokenType: string
 {

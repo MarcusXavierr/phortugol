@@ -1,8 +1,8 @@
 <?php
 
-namespace Toyjs\Toyjs\Expr;
+namespace Phortugol\Expr;
 
-use Toyjs\Toyjs\Token;
+use Phortugol\Token;
 
 class UnaryExpr extends Expr
 {

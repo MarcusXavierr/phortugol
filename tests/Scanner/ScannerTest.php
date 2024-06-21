@@ -3,9 +3,9 @@
 namespace Tests\Scanner;
 
 use PHPUnit\Framework\TestCase;
-use Toyjs\Toyjs\Enums\TokenType;
-use Toyjs\Toyjs\Helpers\ErrorHelper;
-use Toyjs\Toyjs\Scanner\Scanner;
+use Phortugol\Enums\TokenType;
+use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Scanner\Scanner;
 
 class ScannerTest extends TestCase
 {

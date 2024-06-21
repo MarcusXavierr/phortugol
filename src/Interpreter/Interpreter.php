@@ -1,19 +1,19 @@
 <?php
 
-namespace Toyjs\Toyjs\Interpreter;
+namespace Phortugol\Interpreter;
 
 use PHPUnit\Runner\ErrorHandler;
-use Toyjs\Toyjs\Enums\TokenType;
-use Toyjs\Toyjs\Exceptions\RuntimeError;
-use Toyjs\Toyjs\Expr\BinaryExpr;
-use Toyjs\Toyjs\Expr\ConditionalExpr;
-use Toyjs\Toyjs\Expr\Expr;
-use Toyjs\Toyjs\Expr\ExprHandler;
-use Toyjs\Toyjs\Expr\GroupingExpr;
-use Toyjs\Toyjs\Expr\LiteralExpr;
-use Toyjs\Toyjs\Expr\UnaryExpr;
-use Toyjs\Toyjs\Helpers\ErrorHelper;
-use Toyjs\Toyjs\Token;
+use Phortugol\Enums\TokenType;
+use Phortugol\Exceptions\RuntimeError;
+use Phortugol\Expr\BinaryExpr;
+use Phortugol\Expr\ConditionalExpr;
+use Phortugol\Expr\Expr;
+use Phortugol\Expr\ExprHandler;
+use Phortugol\Expr\GroupingExpr;
+use Phortugol\Expr\LiteralExpr;
+use Phortugol\Expr\UnaryExpr;
+use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Token;
 
 /**
  * @extends ExprHandler<mixed>

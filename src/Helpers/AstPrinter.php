@@ -1,14 +1,14 @@
 <?php
 
-namespace Toyjs\Toyjs\Helpers;
+namespace Phortugol\Helpers;
 
-use Toyjs\Toyjs\Expr\BinaryExpr;
-use Toyjs\Toyjs\Expr\ConditionalExpr;
-use Toyjs\Toyjs\Expr\Expr;
-use Toyjs\Toyjs\Expr\ExprHandler;
-use Toyjs\Toyjs\Expr\GroupingExpr;
-use Toyjs\Toyjs\Expr\LiteralExpr;
-use Toyjs\Toyjs\Expr\UnaryExpr;
+use Phortugol\Expr\BinaryExpr;
+use Phortugol\Expr\ConditionalExpr;
+use Phortugol\Expr\Expr;
+use Phortugol\Expr\ExprHandler;
+use Phortugol\Expr\GroupingExpr;
+use Phortugol\Expr\LiteralExpr;
+use Phortugol\Expr\UnaryExpr;
 
 /**
  * @extends ExprHandler<string>

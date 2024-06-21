@@ -1,8 +1,8 @@
 <?php
 
-namespace Toyjs\Toyjs\Helpers;
+namespace Phortugol\Helpers;
 
-use Toyjs\Toyjs\Enums\TokenType;
+use Phortugol\Enums\TokenType;
 
 class ScannerKeywords
 {

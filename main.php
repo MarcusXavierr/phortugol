@@ -8,10 +8,10 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
     require __DIR__ . '/vendor/autoload.php';
 }
 
-use Toyjs\Toyjs\Helpers\ErrorHelper;
-use Toyjs\Toyjs\Interpreter\Interpreter;
-use Toyjs\Toyjs\Parser\Parser;
-use \Toyjs\Toyjs\Scanner\Scanner;
+use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Interpreter\Interpreter;
+use Phortugol\Parser\Parser;
+use Phortugol\Scanner\Scanner;
 
 class Main {
     private ErrorHelper $error;

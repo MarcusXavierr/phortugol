@@ -1,6 +1,6 @@
 <?php
 
-namespace Toyjs\Toyjs\Expr;
+namespace Phortugol\Expr;
 
 class GroupingExpr extends Expr
 {

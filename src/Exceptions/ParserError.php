@@ -1,6 +1,6 @@
 <?php
 
-namespace Toyjs\Toyjs\Exceptions;
+namespace Phortugol\Exceptions;
 
 use Exception;
 

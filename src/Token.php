@@ -1,8 +1,8 @@
 <?php
 
-namespace Toyjs\Toyjs;
+namespace Phortugol;
 
-use Toyjs\Toyjs\Enums\TokenType;
+use Phortugol\Enums\TokenType;
 
 class Token
 {

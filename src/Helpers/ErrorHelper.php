@@ -1,10 +1,10 @@
 <?php
 
-namespace Toyjs\Toyjs\Helpers;
+namespace Phortugol\Helpers;
 
-use Toyjs\Toyjs\Enums\TokenType;
-use Toyjs\Toyjs\Exceptions\RuntimeError;
-use Toyjs\Toyjs\Token;
+use Phortugol\Enums\TokenType;
+use Phortugol\Exceptions\RuntimeError;
+use Phortugol\Token;
 
 
 // TODO: Inject a buffer on constructor to mock echo

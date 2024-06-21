@@ -1,6 +1,6 @@
 <?php
 
-namespace Toyjs\Toyjs\Helpers;
+namespace Phortugol\Helpers;
 
 class StringHelper
 {

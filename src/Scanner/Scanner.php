@@ -1,10 +1,10 @@
 <?php
 
-namespace Toyjs\Toyjs\Scanner;
+namespace Phortugol\Scanner;
 
-use Toyjs\Toyjs\Enums\TokenType;
-use Toyjs\Toyjs\Helpers\ErrorHelper;
-use Toyjs\Toyjs\Token;
+use Phortugol\Enums\TokenType;
+use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Token;
 
 class Scanner
 {

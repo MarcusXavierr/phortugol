@@ -1,9 +1,9 @@
 <?php
 
-namespace Toyjs\Toyjs\Exceptions;
+namespace Phortugol\Exceptions;
 
 use Exception;
-use Toyjs\Toyjs\Token;
+use Phortugol\Token;
 
 class RuntimeError extends Exception
 {
