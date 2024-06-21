@@ -5,6 +5,7 @@ namespace Toyjs\Toyjs\Parser;
 use Toyjs\Toyjs\Enums\TokenType;
 use Toyjs\Toyjs\Exceptions\ParserError;
 use Toyjs\Toyjs\Expr\BinaryExpr;
+use Toyjs\Toyjs\Expr\ConditionalExpr;
 use Toyjs\Toyjs\Expr\Expr;
 use Toyjs\Toyjs\Expr\GroupingExpr;
 use Toyjs\Toyjs\Expr\LiteralExpr;
@@ -38,7 +39,52 @@ class Parser
 
     private function expression(): Expr
     {
-        return $this->equality();
+        return $this->conditional();
+    }
+
+    private function conditional(): Expr
+    {
+        $expr = $this->logic_or();
+
+        if ($this->match(TokenType::QUESTION)) {
+            $left = $this->expression();
+
+            if (!$this->match(TokenType::COLON)) {
+                throw $this->error($this->peek(), "É esperado um ':' e a expressão caso seja falso.");
+            }
+            $right = $this->conditional();
+            $expr = new ConditionalExpr($expr, $left, $right);
+        }
+
+        return $expr;
+    }
+
+    private function logic_or(): Expr
+    {
+        $expr = $this->logic_and();
+
+        while($this->match(TokenType::OR)) {
+            $operator = $this->previous();
+            $right = $this->logic_and();
+
+            $expr = new BinaryExpr($expr, $operator, $right);
+        }
+
+        return $expr;
+    }
+
+    private function logic_and(): Expr
+    {
+        $expr = $this->equality();
+
+        while($this->match(TokenType::AND)) {
+            $operator = $this->previous();
+            $right = $this->equality();
+
+            $expr = new BinaryExpr($expr, $operator, $right);
+        }
+
+        return $expr;
     }
 
     private function equality(): Expr
@@ -115,11 +161,11 @@ class Parser
         if ($this->match(TokenType::LEFT_PAREN)) {
             $expr = $this->expression();
 
-            $this->consume(TokenType::RIGHT_PAREN, "Expected ')' after expression.");
+            $this->consume(TokenType::RIGHT_PAREN, "É preciso ter um  ')' após a expressão.");
             return new GroupingExpr($expr);
         }
 
-        throw $this->error($this->peek(), "Expect expression.");
+        throw $this->error($this->peek(), "Espera uma expressão.");
     }
 
     private function consume(TokenType $kind, string $errorMessage): Token

@@ -11,6 +11,8 @@ enum TokenType: string
     case SLASH = '/'; case STAR = '*'; case MINUS = '-'; case PLUS = '+';
     case BANG = '!'; case GREATER = '>'; case LESS = '<'; case EQUAL = '='; case MODULO = '%';
 
+    case QUESTION = '?'; case COLON = ':';
+
     // two character tokens.
     case BANG_EQUAL = '!='; case EQUAL_EQUAL = '=='; case GREATER_EQUAL = '>='; case LESS_EQUAL = '<=';
     case PLUS_PLUS = '++'; case MINUS_MINUS = '--';
@@ -26,5 +28,6 @@ enum TokenType: string
     case FUNCTION = 'funcao'; case RETURN = 'retorne';
     case NULL = 'nulo'; case UNDEFINED = 'indefinido';
 
+    case PRINT = 'escreva';
     case EOF = '\0';
 }

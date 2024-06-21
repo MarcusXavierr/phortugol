@@ -59,6 +59,8 @@ class Scanner
             '.' => $this->addToken(TokenType::DOT),
             ';' => $this->addToken(TokenType::SEMICOLON),
             '%' => $this->addToken(TokenType::MODULO),
+            '?' => $this->addToken(TokenType::QUESTION),
+            ':' => $this->addToken(TokenType::COLON),
 
             // One or two char tokens
             '+' => $this->addToken($this->match('+') ? TokenType::PLUS_PLUS: TokenType::PLUS),

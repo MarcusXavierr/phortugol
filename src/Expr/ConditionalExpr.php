@@ -2,7 +2,7 @@
 
 namespace Toyjs\Toyjs\Expr;
 
-class ConditionalExpr
+class ConditionalExpr extends  Expr
 {
     public function __construct(
         public readonly Expr $condition,
