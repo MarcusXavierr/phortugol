@@ -1,6 +1,6 @@
-# ToyJS, a simple JavaScript interpreter written in PHP
+# Phortugol, a simple portugol interpreter written in PHP
 
-This is a toy JavaScript interpreter written in PHP. It is not complete and not fully compliant with the ECMAScript standard. It is intended for educational purposes only.
+This project aims to implement a version of portugol similar to javascript
 
 To run the interpreter, you need to have PHP 8.2 or greater installed on your system, and composer too.
 
