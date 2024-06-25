@@ -8,19 +8,19 @@ use Exception;
 /**
  * @template T
  */
-abstract class ExprHandler
+trait ExprHandler
 {
     /**
      * @return T
      */
-    public function handle(Expr $expr): mixed {
+    public function evaluate(Expr $expr): mixed {
         return match(true) {
             $expr instanceof BinaryExpr => $this->handleBinary($expr),
             $expr instanceof UnaryExpr => $this->handleUnary($expr),
             $expr instanceof LiteralExpr => $this->handleLiteral($expr),
             $expr instanceof GroupingExpr => $this->handleGrouping($expr),
             $expr instanceof ConditionalExpr => $this->handleConditional($expr),
-            default => throw new Exception("Incomplete implementation")
+            default => throw new Exception("Incomplete expression implementation")
         };
     }
 

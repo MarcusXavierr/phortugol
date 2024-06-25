@@ -10,13 +10,13 @@ use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\UnaryExpr;
 
-/**
- * @extends ExprHandler<string>
-*/
-class AstPrinter extends ExprHandler
+class AstPrinter
 {
+    /** @use ExprHandler<string> */
+    use ExprHandler;
+
     public function print(Expr $expression): string {
-       return $this->handle($expression);
+       return $this->evaluate($expression);
     }
 
     protected function handleBinary(BinaryExpr $expr): string {
@@ -33,7 +33,7 @@ class AstPrinter extends ExprHandler
     }
 
     protected function handleGrouping(GroupingExpr $expr): string {
-        return $this->handle($expr->expression);
+        return $this->evaluate($expr->expression);
     }
 
     protected function handleConditional(ConditionalExpr $expr): string {
@@ -43,7 +43,7 @@ class AstPrinter extends ExprHandler
     private function parenthesize(string $name, Expr ...$exprs): string {
         $builder = "(" . $name;
         foreach ($exprs as $expr) {
-            $builder .= " " . $this->handle($expr);
+            $builder .= " " . $this->evaluate($expr);
         }
         $builder .= ")";
 
