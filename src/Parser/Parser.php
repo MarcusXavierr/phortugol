@@ -4,16 +4,19 @@ namespace Phortugol\Parser;
 
 use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\ParserError;
+use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\UnaryExpr;
+use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
+use Phortugol\Stmt\VarStmt;
 use Phortugol\Token;
 
 class Parser
@@ -32,17 +35,29 @@ class Parser
     }
 
     /**
-    * @return Stmt[]|null
+    * @return Stmt|null[]|null
     */
     public function parse(): array | null
     {
-        $statements = [];
+        $declarations = [];
         try {
             while(!$this->isAtEnd()) {
-                array_push($statements, $this->statement());
+                array_push($declarations, $this->declaration());
             }
-            return $statements;
+            return $declarations;
         } catch (ParserError $e) {
+            return null;
+        }
+    }
+
+    private function declaration(): ?Stmt
+    {
+        try {
+            if ($this->match(TokenType::VAR)) return $this->varDeclaration();
+
+            return $this->statement();
+        } catch (ParserError $e) {
+            $this->sincronize();
             return null;
         }
     }
@@ -52,6 +67,18 @@ class Parser
         if ($this->match(TokenType::PRINT)) return $this->printStmt();
 
         return $this->expressionStmt();
+    }
+
+    private function varDeclaration(): Stmt
+    {
+        $identifier = $this->validate(TokenType::IDENTIFIER, "Necessário dar um nome para a sua variável");
+        $initializer = null;
+        if ($this->match(TokenType::EQUAL)) {
+            $initializer = $this->expression();
+        }
+
+        $this->validate(TokenType::SEMICOLON, "Esperado um ';' após declarar uma variavel");
+        return new VarStmt($identifier->lexeme, $initializer);
     }
 
     private function expressionStmt(): Stmt
@@ -69,9 +96,27 @@ class Parser
         return new PrintStmt($expr);
     }
 
+    // EXPRESSIONS
     private function expression(): Expr
     {
-        return $this->conditional();
+        return $this->assignment();
+    }
+
+    private function assignment(): Expr
+    {
+        $expr = $this->conditional();
+        if ($this->match(TokenType::EQUAL)) {
+            $equals = $this->previous();
+            $assignment = $this->assignment();
+
+            if ($expr instanceof VarExpr) {
+                return new AssignExpr($expr->name, $assignment);
+            }
+
+            $this->error($equals, "Esperado uma variável antes do '='");
+        }
+
+        return $expr;
     }
 
     private function conditional(): Expr
@@ -190,12 +235,17 @@ class Parser
             return new LiteralExpr($this->previous()->literal);
         }
 
+        if ($this->match(TokenType::IDENTIFIER)) {
+            return new VarExpr($this->previous());
+        }
+
         if ($this->match(TokenType::LEFT_PAREN)) {
             $expr = $this->expression();
 
             $this->validate(TokenType::RIGHT_PAREN, "É preciso ter um  ')' após a expressão.");
             return new GroupingExpr($expr);
         }
+
 
         throw $this->error($this->peek(), "Espera uma expressão.");
     }
@@ -253,6 +303,12 @@ class Parser
 
     private function peek(): Token
     {
+        $sizeTokens = count($this->tokens);
+        if ($this->current >= $sizeTokens) {
+            $lastLine = $this->tokens[$sizeTokens - 1]->line;
+            return new Token(TokenType::EOF, null, "", $lastLine);
+        }
+
         return $this->tokens[$this->current];
     }
 
