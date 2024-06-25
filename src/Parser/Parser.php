@@ -11,6 +11,9 @@ use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\PrintStmt;
+use Phortugol\Stmt\Stmt;
 use Phortugol\Token;
 
 class Parser
@@ -28,13 +31,42 @@ class Parser
         $this->tokens = $tokens;
     }
 
-    public function parse(): Expr | null
+    /**
+    * @return Stmt[]|null
+    */
+    public function parse(): array | null
     {
+        $statements = [];
         try {
-            return $this->expression();
+            while(!$this->isAtEnd()) {
+                array_push($statements, $this->statement());
+            }
+            return $statements;
         } catch (ParserError $e) {
             return null;
         }
+    }
+
+    private function statement(): Stmt
+    {
+        if ($this->match(TokenType::PRINT)) return $this->printStmt();
+
+        return $this->expressionStmt();
+    }
+
+    private function expressionStmt(): Stmt
+    {
+        $expr = $this->expression();
+        $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+        return new ExpressionStmt($expr);
+    }
+
+    // TODO: Parse print with parenthesis
+    private function printStmt(): Stmt
+    {
+        $expr = $this->expression();
+        $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+        return new PrintStmt($expr);
     }
 
     private function expression(): Expr
@@ -161,14 +193,14 @@ class Parser
         if ($this->match(TokenType::LEFT_PAREN)) {
             $expr = $this->expression();
 
-            $this->consume(TokenType::RIGHT_PAREN, "É preciso ter um  ')' após a expressão.");
+            $this->validate(TokenType::RIGHT_PAREN, "É preciso ter um  ')' após a expressão.");
             return new GroupingExpr($expr);
         }
 
         throw $this->error($this->peek(), "Espera uma expressão.");
     }
 
-    private function consume(TokenType $kind, string $errorMessage): Token
+    private function validate(TokenType $kind, string $errorMessage): Token
     {
         if ($this->check($kind)) return $this->advance();
         throw $this->error($this->peek(), $errorMessage);
@@ -237,6 +269,6 @@ class Parser
 
     private function isAtEnd(): bool
     {
-        return $this->current >= count($this->tokens);
+        return $this->peek()->kind === TokenType::EOF;
     }
 }

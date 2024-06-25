@@ -28,6 +28,6 @@ enum TokenType: string
     case FUNCTION = 'funcao'; case RETURN = 'retorne';
     case NULL = 'nulo'; case UNDEFINED = 'indefinido';
 
-    case PRINT = 'escreva';
+    case PRINT = 'escreva'; case READ = 'leia';
     case EOF = '\0';
 }

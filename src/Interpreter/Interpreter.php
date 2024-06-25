@@ -6,18 +6,24 @@ use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\ConditionalExpr;
-use Phortugol\Expr\Expr;
 use Phortugol\Expr\ExprHandler;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\PrintStmt;
+use Phortugol\Stmt\Stmt;
+use Phortugol\Stmt\StmtHandler;
 
-/**
- * @extends ExprHandler<mixed>
-*/
-class Interpreter extends ExprHandler
+class Interpreter
 {
+    /** @use ExprHandler<mixed> */
+    use ExprHandler;
+
+    /** @use StmtHandler<void> */
+    use StmtHandler;
+
     private readonly ErrorHelper $errorHelper;
     private readonly TypeValidator $typeValidator;
 
@@ -26,18 +32,15 @@ class Interpreter extends ExprHandler
         $this->errorHelper = $errorHelper;
         $this->typeValidator = new TypeValidator();
     }
-
-    public function interpret(Expr $expr): void
+    /**
+     * @param Stmt[] $statements
+     */
+    public function interpret(array $statements): void
     {
         try {
-            $result = $this->handle($expr);
-            if ($result === true) {
-                 $result = "verdadeiro";
-            } else if ($result === false) {
-                $result = "falso";
+            foreach($statements as $statement) {
+                $this->execute($statement);
             }
-
-            echo $result . PHP_EOL;
         } catch (RuntimeError $e) {
             $this->errorHelper->runtimeError($e);
         }
@@ -45,8 +48,8 @@ class Interpreter extends ExprHandler
 
     protected function handleBinary(BinaryExpr $expr): mixed
     {
-        $left = $this->handle($expr->left);
-        $right = $this->handle($expr->right);
+        $left = $this->evaluate($expr->left);
+        $right = $this->evaluate($expr->right);
 
         if ($this->typeValidator->shouldBeNumeric($expr->token->kind)) {
             $this->typeValidator->validateIsNumber($expr->token, $left, $right);
@@ -102,7 +105,7 @@ class Interpreter extends ExprHandler
 
     protected function handleUnary(UnaryExpr $expr): mixed
     {
-        $result = $this->handle($expr->right);
+        $result = $this->evaluate($expr->right);
         switch($expr->token->kind) {
             case TokenType::MINUS:
                 $this->typeValidator->validateIsNumber($expr->token, $result);
@@ -116,7 +119,7 @@ class Interpreter extends ExprHandler
 
     protected function handleGrouping(GroupingExpr $expr): mixed
     {
-        return $this->handle($expr->expression);
+        return $this->evaluate($expr->expression);
     }
 
     protected function handleLiteral(LiteralExpr $expr): mixed
@@ -126,12 +129,33 @@ class Interpreter extends ExprHandler
 
     protected function handleConditional(ConditionalExpr $expr): mixed
     {
-        $condition = $this->handle($expr->condition);
+        $condition = $this->evaluate($expr->condition);
         if ($condition) {
-            return $this->handle($expr->trueExpr);
+            return $this->evaluate($expr->trueExpr);
         }
 
-        return $this->handle($expr->falseExpr);
+        return $this->evaluate($expr->falseExpr);
     }
 
+    // Statements
+    protected function handlePrint(PrintStmt $stmt): void
+    {
+        $result = $this->evaluate($stmt->expression);
+
+        if ($result === true) {
+            echo "verdadeiro";
+        } else if ($result === false) {
+            echo "falso";
+        }
+        else {
+            echo $result;
+        }
+
+        echo PHP_EOL;
+    }
+
+    protected function handleExpression(ExpressionStmt $stmt): void
+    {
+        $this->evaluate($stmt->expression);
+    }
 }

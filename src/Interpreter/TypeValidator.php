@@ -8,6 +8,7 @@ use Phortugol\Token;
 
 class TypeValidator
 {
+    /** @var TokenType[] $numericTokenKinds */
     private array $numericTokenKinds = [
         TokenType::MINUS,
         TokenType::STAR,

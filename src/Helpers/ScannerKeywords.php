@@ -22,6 +22,8 @@ class ScannerKeywords
         'enquanto' => TokenType::WHILE,
         'pare' => TokenType::BREAK,
         'continue' => TokenType::CONTINUE,
+        'escreva' => TokenType::PRINT,
+        'leia' => TokenType::READ,
         // 'let' => TokenType::LET,
         // 'const' => TokenType::CONST,
     ];
