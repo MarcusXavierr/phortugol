@@ -4,15 +4,20 @@ namespace Tests\Parser;
 
 use PHPUnit\Framework\TestCase;
 use Phortugol\Enums\TokenType;
+use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\ConditionalExpr;
+use Phortugol\Expr\VarExpr;
 use Phortugol\Parser\Parser;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\PrintStmt;
+use Phortugol\Stmt\Stmt;
+use Phortugol\Stmt\VarStmt;
 use Phortugol\Token;
 
 class ParserTest extends TestCase
@@ -135,8 +140,92 @@ class ParserTest extends TestCase
                     )
                 )
             ],
+            "should parse var usage on expression" => [
+                "tokens" => [
+                    numToken(1),
+                    token("+"),
+                    token(TokenType::IDENTIFIER, 'a'),
+                    token(";")
+                ],
+                "expected" => new BinaryExpr(
+                    literal(1),
+                    token(TokenType::PLUS),
+                    new VarExpr(token(TokenType::IDENTIFIER, 'a'))
+                )
+            ],
+            "should parse var assignment" => [
+                "tokens" => [
+                    token(TokenType::IDENTIFIER, 'a'),
+                    token(TokenType::EQUAL),
+                    numToken(10),
+                    token(";")
+                ],
+                "expected" => new AssignExpr(
+                    token(TokenType::IDENTIFIER, 'a'),
+                    literal(10),
+                )
+            ],
         ];
     }
+
+    /**
+     * @dataProvider possible_statements
+     * @param Token[] $tokens
+     */
+    public function test_parse_statements(array $tokens, Stmt $expected): void
+    {
+        array_push($tokens, token(TokenType::EOF));
+
+        $parser = new Parser($this->errorHelper, $tokens);
+        $result = $parser->parse();
+
+        $this->assertFalse($this->errorHelper->hadError);
+        $this->assertEquals($expected, $result[0]);
+    }
+
+    /**
+     * @return array<string, array{tokens: Token[], expected: Expr}>
+     */
+    public static function possible_statements(): array
+    {
+        return [
+            "should parse a hello world" => [
+                "tokens" => [
+                    token('escreva'),
+                    token(TokenType::STRING, 'oi mundo'),
+                    token(';')
+                ],
+                "expected" => new PrintStmt(
+                    new LiteralExpr('oi mundo')
+                )
+            ],
+            "should parse a var declaration with initializer" => [
+                "tokens" => [
+                    token('var'),
+                    token(TokenType::IDENTIFIER, 'a'),
+                    token('='),
+                    token(TokenType::NUMBER, 1),
+                    token(';')
+                ],
+                "expected" => new VarStmt(
+                    'a',
+                    literal(1)
+                )
+            ],
+            "should parse a var declaration without initializer" => [
+                "tokens" => [
+                    token('var'),
+                    token(TokenType::IDENTIFIER, 'a'),
+                    token(';')
+                ],
+                "expected" => new VarStmt(
+                    'a',
+                    null
+                )
+            ],
+        ];
+    }
+
 }
 
 function literal(mixed $value): LiteralExpr
