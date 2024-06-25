@@ -9,6 +9,18 @@ use Phortugol\Scanner\Scanner;
 
 class ScannerTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+        ob_start();
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        ob_end_clean();
+    }
+
     public function test_scan_string_with_error(): void
     {
         $error = new ErrorHelper();

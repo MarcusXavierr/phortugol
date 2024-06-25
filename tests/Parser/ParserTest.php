@@ -12,15 +12,24 @@ use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Parser\Parser;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Token;
 
 class ParserTest extends TestCase
 {
     protected ErrorHelper $errorHelper;
+
     public function setUp(): void
     {
         parent::setUp();
+        ob_start();
         $this->errorHelper = new ErrorHelper();
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        ob_end_clean();
     }
 
     public function test_parse_with_error(): void
