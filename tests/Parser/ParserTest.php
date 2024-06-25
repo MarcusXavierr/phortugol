@@ -49,12 +49,16 @@ class ParserTest extends TestCase
      * @dataProvider possible_expressions
      * @param Token[] $tokens
      */
-    public function test_parse_without_error(array $tokens, Expr $expected): void
+    public function test_parse_expression_without_error(array $tokens, Expr $expected): void
     {
+        $expectedStmt = new ExpressionStmt($expected);
+        array_push($tokens, token(TokenType::EOF));
+
         $parser = new Parser($this->errorHelper, $tokens);
-        $expr = $parser->parse();
+        $result = $parser->parse();
+
         $this->assertFalse($this->errorHelper->hadError);
-        $this->assertEquals($expected, $expr);
+        $this->assertEquals($expectedStmt, $result[0]);
     }
 
     /**
@@ -65,34 +69,34 @@ class ParserTest extends TestCase
         return [
             "should parse a simple expression" => [
                 "tokens" => [
-                    token(TokenType::NUMBER, 1),
-                    token(TokenType::PLUS),
-                    token(TokenType::NUMBER, 2),
-                    token(TokenType::EOF),
+                    numToken(1),
+                    token("+"),
+                    numToken(2),
+                    token(";")
                 ],
                 "expected" => new BinaryExpr(
-                    new LiteralExpr(1),
-                    new Token(TokenType::PLUS, null, "+", 1),
-                    new LiteralExpr(2)
+                    literal(1),
+                    token(TokenType::PLUS),
+                    literal(2)
                 )
             ],
             "should parse a grouping expression" => [
                 "tokens" => [
-                    token(TokenType::NUMBER, 2),   // 2
-                    token(TokenType::STAR),        // *
-                    token(TokenType::MINUS),       // -
-                    token(TokenType::LEFT_PAREN),  // (
-                    token(TokenType::NUMBER, 3),   // 3
-                    token(TokenType::RIGHT_PAREN), // )
-                    token(TokenType::EOF),
+                    numToken(2),
+                    token("*"),
+                    token("-"),
+                    token("("),
+                    numToken(3),
+                    token(")"),
+                    token(";")
                 ],
                 "expected" => new BinaryExpr(
-                    new LiteralExpr(2),
-                    token(TokenType::STAR),
+                    literal(2),
+                    token("*"),
                     new UnaryExpr(
-                        token(TokenType::MINUS),
+                        token("-"),
                         new GroupingExpr(
-                            new LiteralExpr(3)
+                            literal(3)
                         )
                     )
                 )
@@ -100,24 +104,56 @@ class ParserTest extends TestCase
             "should parse a ternary expression" => [
                 "tokens" => [
                     token(TokenType::TRUE),
-                    token(TokenType::QUESTION),
-                    token(TokenType::NUMBER, 1),
-                    token(TokenType::COLON),
-                    token(TokenType::NUMBER, 2),
-                    token(TokenType::EOF),
+                    token("?"),
+                    numToken(1),
+                    token(":"),
+                    numToken(2),
+                    token(";")
                 ],
                 "expected" => new ConditionalExpr(
-                    new LiteralExpr(true),
-                    new LiteralExpr(1),
-                    new LiteralExpr(2)
+                    literal(true),
+                    literal(1),
+                    literal(2)
                 )
-            ]
+            ],
+            "sould parse boolean expressions" => [
+                "tokens" => [
+                    token(TokenType::TRUE),
+                    token(TokenType::OR),
+                    token(TokenType::FALSE),
+                    token(TokenType::AND),
+                    token(TokenType::TRUE),
+                    token(";")
+                ],
+                "expected" => new BinaryExpr(
+                    literal(true),
+                    token(TokenType::OR),
+                    new BinaryExpr(
+                        literal(false),
+                        token(TokenType::AND),
+                        literal(true)
+                    )
+                )
+            ],
         ];
     }
 }
 
-function token(TokenType $kind, mixed $literal = null): Token
+function literal(mixed $value): LiteralExpr
 {
+    return new LiteralExpr($value);
+}
+
+function numToken(float|int $value): Token
+{
+    return token(TokenType::NUMBER, $value);
+}
+
+function token(string|TokenType $kind, mixed $literal = null): Token
+{
+    if (is_string($kind)) {
+        $kind = TokenType::from($kind);
+    }
     $lexeme = $literal ?? $kind->value;
     return new Token($kind, $literal, $lexeme, 1);
 }
