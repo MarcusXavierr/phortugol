@@ -13,6 +13,7 @@ use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
@@ -65,8 +66,23 @@ class Parser
     private function statement(): Stmt
     {
         if ($this->match(TokenType::PRINT)) return $this->printStmt();
+        if ($this->match(TokenType::LEFT_BRACE)) return new BlockStmt($this->blockStatement());
 
         return $this->expressionStmt();
+    }
+
+    /**
+     * @return Stmt[]
+     */
+    private function blockStatement(): array
+    {
+        $declarations = [];
+        while(!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
+            $declarations[] = $this->declaration();
+        }
+
+        $this->validate(TokenType::RIGHT_BRACE, "Esperado '}' no fim de um bloco");
+        return $declarations;
     }
 
     private function varDeclaration(): Stmt

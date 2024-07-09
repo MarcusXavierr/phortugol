@@ -19,6 +19,7 @@ trait StmtHandler
             $stmt instanceof PrintStmt => $this->handlePrint($stmt),
             $stmt instanceof ExpressionStmt => $this->handleExpression($stmt),
             $stmt instanceof VarStmt => $this->handleVarStmt($stmt),
+            $stmt instanceof BlockStmt => $this->handleBlockStmt($stmt),
             default => throw new Exception("Incomplete statement implementation")
         };
     }
@@ -37,4 +38,9 @@ trait StmtHandler
      * @return T
      */
     protected abstract function handleVarStmt(VarStmt $stmt);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleBlockStmt(BlockStmt $stmt);
 }

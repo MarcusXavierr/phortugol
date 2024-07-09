@@ -5,14 +5,13 @@ namespace Phortugol\Interpreter;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 
-// TODO: Adicionar blocos
-// TODO: Adicionar escopo nos blocos
 // TODO: Adicionar if/else
 // TODO: Implementar short circuit de operadores lógics OR e AND
 //
@@ -26,13 +25,13 @@ class Interpreter
     private readonly ErrorHelper $errorHelper;
     private readonly TypeValidator $typeValidator;
     private readonly ExprInterpreter $exprInterpreter;
-    private readonly Environment $environment;
+    private Environment $environment;
 
     public function __construct(ErrorHelper $errorHelper)
     {
         $this->errorHelper = $errorHelper;
         $this->typeValidator = new TypeValidator();
-        $this->environment = new Environment();
+        $this->environment = new Environment(null);
         $this->exprInterpreter = new ExprInterpreter($this->errorHelper, $this->environment);
     }
     /**
@@ -84,5 +83,22 @@ class Interpreter
         }
 
         $this->environment->define($stmt->identifier, $initializer);
+    }
+
+    protected function handleBlockStmt(BlockStmt $stmt): void
+    {
+        $previous = $this->environment;
+        $block = new Environment($this->environment);
+        try {
+            $this->environment = $block;
+            $this->exprInterpreter->setEnvironment($block);
+            foreach($stmt->declarations as $declaration) {
+                $this->execute($declaration);
+            }
+        } finally {
+            // INFO: restore environment
+            $this->environment = $previous;
+            $this->exprInterpreter->setEnvironment($previous);
+        }
     }
 }

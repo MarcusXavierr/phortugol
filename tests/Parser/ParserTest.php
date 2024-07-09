@@ -14,6 +14,7 @@ use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Parser\Parser;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
@@ -223,6 +224,19 @@ class ParserTest extends TestCase
                     null
                 )
             ],
+            "should parse a block" => [
+                "tokens" => [
+                    token('{'),
+                    token('escreva'),
+                    token(TokenType::STRING, 'oi'),
+                    token(';'),
+                    token('}')
+                ],
+                "expected" => new BlockStmt([
+                    new PrintStmt(literal('oi'))
+                ])
+            ],
+
         ];
     }
 
