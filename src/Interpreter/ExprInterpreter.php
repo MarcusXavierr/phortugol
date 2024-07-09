@@ -21,12 +21,17 @@ class ExprInterpreter
 
     private readonly ErrorHelper $errorHelper;
     private readonly TypeValidator $typeValidator;
-    private readonly Environment $environment;
+    private Environment $environment;
 
     public function __construct(ErrorHelper $errorHelper, Environment $environment)
     {
         $this->errorHelper = $errorHelper;
         $this->typeValidator = new TypeValidator();
+        $this->environment = $environment;
+    }
+
+    public function setEnvironment(Environment $environment): void
+    {
         $this->environment = $environment;
     }
 

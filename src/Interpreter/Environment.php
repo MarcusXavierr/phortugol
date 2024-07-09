@@ -8,6 +8,11 @@ use Phortugol\Token;
 class Environment
 {
     private array $state = [];
+    private readonly ?Environment $enclosing;
+
+    public function __construct(?Environment $enclosing) {
+        $this->enclosing = $enclosing;
+    }
 
     public function define(string $name, mixed $value): void
     {
@@ -20,15 +25,25 @@ class Environment
             return $this->state[$name->lexeme];
         }
 
+        if ($this->enclosing != null) {
+            return $this->enclosing->get($name);
+        }
+
         throw new RuntimeError($name, "Variável não definida {$name->lexeme}");
     }
 
     public function assign(Token $name, mixed $value): void
     {
-        if (!array_key_exists($name->lexeme, $this->state)) {
-            throw new RuntimeError($name, "Variável não definida {$name->lexeme}");
+        if (array_key_exists($name->lexeme, $this->state)) {
+            $this->state[$name->lexeme] = $value;
+            return;
         }
 
-        $this->state[$name->lexeme] = $value;
+        if ($this->enclosing != null) {
+            $this->enclosing->assign($name, $value);
+            return;
+        }
+
+        throw new RuntimeError($name, "Variável não definida {$name->lexeme}");
     }
 }
