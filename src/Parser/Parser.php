@@ -10,6 +10,7 @@ use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
+use Phortugol\Expr\LogicalExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
@@ -177,7 +178,7 @@ class Parser
             $operator = $this->previous();
             $right = $this->logic_and();
 
-            $expr = new BinaryExpr($expr, $operator, $right);
+            $expr = new LogicalExpr($expr, $operator, $right);
         }
 
         return $expr;
@@ -191,7 +192,7 @@ class Parser
             $operator = $this->previous();
             $right = $this->equality();
 
-            $expr = new BinaryExpr($expr, $operator, $right);
+            $expr = new LogicalExpr($expr, $operator, $right);
         }
 
         return $expr;

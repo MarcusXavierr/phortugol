@@ -9,6 +9,7 @@ use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
+use Phortugol\Expr\LogicalExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\VarExpr;
@@ -132,10 +133,10 @@ class ParserTest extends TestCase
                     token(TokenType::TRUE),
                     token(";")
                 ],
-                "expected" => new BinaryExpr(
+                "expected" => new LogicalExpr(
                     literal(true),
                     token(TokenType::OR),
-                    new BinaryExpr(
+                    new LogicalExpr(
                         literal(false),
                         token(TokenType::AND),
                         literal(true)

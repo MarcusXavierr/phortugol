@@ -13,11 +13,9 @@ use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 
-// TODO: Adicionar if/else
-// TODO: Implementar short circuit de operadores lógics OR e AND
-//
 // TODO: Escrever alguns arrquivos de teste (tipo de integração)
-// TODO: Desafio: Tentar implementar vc mesmo uma versão de while e for loops
+// TODO: Adicionar a opção de ter lexemas UTF-8. E adicionar senão como um token de ELSE válido
+// TODO: Implementar NULLs
 class Interpreter
 {
     /** @use StmtHandler<void> */

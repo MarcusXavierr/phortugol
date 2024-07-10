@@ -10,6 +10,7 @@ use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\ExprHandler;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
+use Phortugol\Expr\LogicalExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
@@ -65,12 +66,6 @@ class ExprInterpreter
                     return $left + $right;
                 }
                 throw new RuntimeError($expr->token, "Os operandos precisam ser ambos números ou strings");
-
-            // Logical operators
-            case TokenType::AND:
-                return $left && $right;
-            case TokenType::OR:
-                return $left || $right;
 
             // Comparison operators
             case TokenType::GREATER:
@@ -136,5 +131,17 @@ class ExprInterpreter
         $value = $this->evaluate($expr->assignment);
         $this->environment->assign($expr->identifier, $value);
         return $value;
+    }
+
+    protected function handleLogicalExpr(LogicalExpr $expr): mixed
+    {
+        $left = $this->evaluate($expr->left);
+        if ($expr->operator->kind == TokenType::OR) {
+            if ($left) return $left;
+        } else {
+            if (!$left) return $left;
+        }
+
+        return $this->evaluate($expr->right);
     }
 }
