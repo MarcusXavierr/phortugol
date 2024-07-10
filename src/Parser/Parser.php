@@ -15,6 +15,7 @@ use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\VarStmt;
@@ -66,6 +67,7 @@ class Parser
     private function statement(): Stmt
     {
         if ($this->match(TokenType::PRINT)) return $this->printStmt();
+        if ($this->match(TokenType::IF)) return $this->ifStmt();
         if ($this->match(TokenType::LEFT_BRACE)) return new BlockStmt($this->blockStatement());
 
         return $this->expressionStmt();
@@ -110,6 +112,21 @@ class Parser
         $expr = $this->expression();
         $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
         return new PrintStmt($expr);
+    }
+
+    private function ifStmt(): Stmt
+    {
+        $this->validate(TokenType::LEFT_PAREN, "É esperado um '(' logo após o 'se'.");
+        $condition = $this->expression();
+        $this->validate(TokenType::RIGHT_PAREN, "É esperado um ')' após uma expressão de 'se'.");
+
+        $thenBranch = $this->statement();
+        $elseBranch = null;
+        if ($this->match(TokenType::ELSE)) {
+            $elseBranch = $this->statement();
+        }
+
+        return new IfStmt($condition, $thenBranch, $elseBranch);
     }
 
     // EXPRESSIONS

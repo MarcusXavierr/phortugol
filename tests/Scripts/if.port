@@ -1,0 +1,9 @@
+se (verdadeiro) {
+    escreva "entrei no primeiro if";
+} senao {
+    escreva "não deveria ter entrado aqui";
+}
+
+se (10 != 10) {
+    escreva 'não deveria ter entrado no segundo if';
+} senao escreva "entrei no segundo else";

@@ -16,6 +16,7 @@ use Phortugol\Parser\Parser;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\VarStmt;
@@ -236,7 +237,52 @@ class ParserTest extends TestCase
                     new PrintStmt(literal('oi'))
                 ])
             ],
-
+            "should parse an if statement" => [
+                "tokens" => [
+                    token('se'),
+                    token('('),
+                    token(TokenType::TRUE),
+                    token(')'),
+                    token('{'),
+                    token('}'),
+                ],
+                "expected" => new IfStmt(
+                    new LiteralExpr(true),
+                    new BlockStmt([]),
+                    null
+                )
+            ],
+            "should parse if and else" => [
+                "tokens" => [
+                    token('se'),
+                    token('('),
+                    token(TokenType::TRUE),
+                    token(')'),
+                    token('{'),
+                    token('escreva'),
+                    token(TokenType::STRING, 'oi mundo'),
+                    token(';'),
+                    token('}'),
+                    token('senao'),
+                    numToken(10),
+                    token('+'),
+                    numToken(20),
+                    token(';')
+                ],
+                "expected" => new IfStmt(
+                    new LiteralExpr(true),
+                    new BlockStmt([
+                        new PrintStmt(literal('oi mundo'))
+                    ]),
+                    new ExpressionStmt(
+                        new BinaryExpr(
+                            new LiteralExpr(10),
+                            token(TokenType::PLUS),
+                            new LiteralExpr(20)
+                        )
+                    )
+                )
+            ]
         ];
     }
 

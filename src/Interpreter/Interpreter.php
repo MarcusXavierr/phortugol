@@ -7,6 +7,7 @@ use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\StmtHandler;
@@ -99,6 +100,16 @@ class Interpreter
             // INFO: restore environment
             $this->environment = $previous;
             $this->exprInterpreter->setEnvironment($previous);
+        }
+    }
+
+    protected function handleIf(IfStmt $stmt): void
+    {
+        $condition = $this->evaluate($stmt->condition);
+        if ($condition) {
+            $this->execute($stmt->thenBranch);
+        } else if ($stmt->elseBranch) {
+            $this->execute($stmt->elseBranch);
         }
     }
 }
