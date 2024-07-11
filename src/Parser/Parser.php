@@ -20,6 +20,7 @@ use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\VarStmt;
+use Phortugol\Stmt\WhileStmt;
 use Phortugol\Token;
 
 class Parser
@@ -70,6 +71,7 @@ class Parser
         if ($this->match(TokenType::PRINT)) return $this->printStmt();
         if ($this->match(TokenType::IF)) return $this->ifStmt();
         if ($this->match(TokenType::LEFT_BRACE)) return new BlockStmt($this->blockStatement());
+        if ($this->match(TokenType::WHILE)) return $this->whileStmt();
 
         return $this->expressionStmt();
     }
@@ -128,6 +130,24 @@ class Parser
         }
 
         return new IfStmt($condition, $thenBranch, $elseBranch);
+    }
+
+    private function whileStmt(): Stmt
+    {
+        $this->validate(TokenType::LEFT_PAREN, "É esperado um '(' logo após o 'enquanto'.");
+        $condition = $this->expression();
+        $this->validate(TokenType::RIGHT_PAREN, "É esperado um ')' após uma expressão de 'enquanto'.");
+
+        $body = $this->statement();
+
+        return new WhileStmt($condition, $body);
+    }
+
+    private function forStmt(): Stmt
+    {
+        $this->validate(TokenType::LEFT_PAREN, "É esperado um '(' logo após o 'repetir'.");
+        $condition = $this->expression();
+        $this->validate(TokenType::RIGHT_PAREN, "É esperado um ')' após uma expressão de 'repetir'.");
     }
 
     // EXPRESSIONS

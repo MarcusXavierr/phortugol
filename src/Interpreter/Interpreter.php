@@ -12,6 +12,7 @@ use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
+use Phortugol\Stmt\WhileStmt;
 
 // TODO: Escrever alguns arrquivos de teste (tipo de integração)
 // TODO: Adicionar a opção de ter lexemas UTF-8. E adicionar senão como um token de ELSE válido
@@ -108,6 +109,13 @@ class Interpreter
             $this->execute($stmt->thenBranch);
         } else if ($stmt->elseBranch) {
             $this->execute($stmt->elseBranch);
+        }
+    }
+
+    protected function handleWhile(WhileStmt $stmt): void
+    {
+        while ($this->evaluate($stmt->condition)) {
+            $this->execute($stmt->body);
         }
     }
 }

@@ -21,6 +21,7 @@ use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\VarStmt;
+use Phortugol\Stmt\WhileStmt;
 use Phortugol\Token;
 
 class ParserTest extends TestCase
@@ -282,6 +283,25 @@ class ParserTest extends TestCase
                             new LiteralExpr(20)
                         )
                     )
+                )
+            ],
+            "should parse a while statement with body" => [
+                "tokens" => [
+                    token('enquanto'),
+                    token('('),
+                    token(TokenType::TRUE),
+                    token(')'),
+                    token('{'),
+                    token('escreva'),
+                    token(TokenType::STRING, 'oi mundo'),
+                    token(';'),
+                    token('}'),
+                ],
+                "expected" => new WhileStmt(
+                    new LiteralExpr(true),
+                    new BlockStmt([
+                        new PrintStmt(literal('oi mundo'))
+                    ])
                 )
             ]
         ];
