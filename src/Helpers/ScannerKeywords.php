@@ -10,7 +10,7 @@ class ScannerKeywords
         'E' => TokenType::AND,
         'senao' => TokenType::ELSE,
         'falso' => TokenType::FALSE,
-        'para' => TokenType::FOR,
+        'repita' => TokenType::FOR,
         'funcao' => TokenType::FUNCTION,
         'se' => TokenType::IF,
         'nulo' => TokenType::NULL,

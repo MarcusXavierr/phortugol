@@ -22,7 +22,7 @@ enum TokenType: string
 
     // Language keywords
     case IF = 'se'; case ELSE = 'senao'; case TRUE = 'verdadeiro'; case FALSE = 'falso';
-    case AND = '&&'; case OR = '||'; case FOR = 'para'; case WHILE = 'enquanto';
+    case AND = '&&'; case OR = '||'; case FOR = 'repita'; case WHILE = 'enquanto';
     case BREAK = 'pare'; case CONTINUE = 'continue';
     case VAR = 'var';
     case FUNCTION = 'funcao'; case RETURN = 'retorne';

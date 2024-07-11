@@ -31,14 +31,14 @@ class ParserTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        ob_start();
+        // ob_start();
         $this->errorHelper = new ErrorHelper();
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
-        ob_end_clean();
+        // ob_end_clean();
     }
 
     public function test_parse_with_error(): void
@@ -303,7 +303,79 @@ class ParserTest extends TestCase
                         new PrintStmt(literal('oi mundo'))
                     ])
                 )
-            ]
+            ],
+            "should parse a for statement without initializer and increment" => [
+                "tokens" => [
+                    token('repita'),
+                    token('('),
+                    token(';'),
+                    token('verdadeiro'),
+                    token(';'),
+                    token(')'),
+                    token('{'),
+                    token('escreva'),
+                    token(TokenType::STRING, 'teste'),
+                    token(';'),
+                    token('}'),
+                ],
+                "expected" => new WhileStmt(
+                    new LiteralExpr(true),
+                    new BlockStmt([
+                        new PrintStmt(literal('teste'))
+                    ])
+                )
+            ],
+            "should parse a for statement with initializer and increment" => [
+                "tokens" => [
+                    token('repita'),
+                    token('('),
+                    token('var'),
+                    token(TokenType::IDENTIFIER, 'i'),
+                    token('='),
+                    numToken(0),
+                    token(';'),
+                    token(TokenType::IDENTIFIER, 'i'),
+                    token('<'),
+                    numToken(10),
+                    token(';'),
+                    token(TokenType::IDENTIFIER, 'i'),
+                    token('='),
+                    token(TokenType::IDENTIFIER, 'i'),
+                    token('+'),
+                    numToken(1),
+                    token(')'),
+                    token('{'),
+                    token('escreva'),
+                    token(TokenType::STRING, 'teste'),
+                    token(';'),
+                    token('}'),
+                ],
+                "expected" => new BlockStmt([
+                    new VarStmt('i', literal(0)),
+                    new WhileStmt(
+                        new BinaryExpr(
+                            new VarExpr(token(TokenType::IDENTIFIER, 'i')),
+                            token(TokenType::LESS),
+                            literal(10)
+                        ),
+                        new BlockStmt([
+                            new BlockStmt([
+                                new PrintStmt(literal('teste')),
+                            ]),
+                            new ExpressionStmt(
+                                new AssignExpr(
+                                    token(TokenType::IDENTIFIER, 'i'),
+                                    new BinaryExpr(
+                                        new VarExpr(token(TokenType::IDENTIFIER, 'i')),
+                                        token(TokenType::PLUS),
+                                        literal(1)
+                                    )
+                                )
+                            )
+                        ])
+                    )
+                ])
+            ],
         ];
     }
 
