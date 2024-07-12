@@ -17,6 +17,7 @@ use Phortugol\Parser\Parser;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\BreakStmt;
+use Phortugol\Stmt\ContinueStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
@@ -32,14 +33,14 @@ class ParserTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        // ob_start();
+        ob_start();
         $this->errorHelper = new ErrorHelper();
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
-        // ob_end_clean();
+        ob_end_clean();
     }
 
     public function test_parse_with_error(): void
@@ -401,7 +402,7 @@ class ParserTest extends TestCase
                     token('}'),
                 ],
                 "expected" => new WhileStmt(
-                    new LiteralExpr(true),
+                    literal(true),
                     new BlockStmt([
                         new BreakStmt()
                     ])

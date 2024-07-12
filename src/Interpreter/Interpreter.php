@@ -3,6 +3,7 @@
 namespace Phortugol\Interpreter;
 
 use Phortugol\Exceptions\BreakException;
+use Phortugol\Exceptions\ContinueException;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
@@ -121,15 +122,24 @@ class Interpreter
     {
         try {
             while ($this->evaluate($stmt->condition)) {
-                $this->execute($stmt->body);
+                try {
+                    $this->execute($stmt->body);
+                } catch (ContinueException $e) {
+                    // INFO: continues the loop
+                }
             }
         } catch (BreakException $e) {
             // INFO: breaks the loop
         }
     }
 
-    protected function handleBreak(BreakStmt $stmt): void
+    protected function handleBreak(): void
     {
         throw new BreakException();
+    }
+
+    protected function handleContinue(): void
+    {
+        throw new ContinueException();
     }
 }

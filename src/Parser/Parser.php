@@ -16,6 +16,7 @@ use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\BreakStmt;
+use Phortugol\Stmt\ContinueStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
@@ -76,6 +77,7 @@ class Parser
         if ($this->match(TokenType::WHILE)) return $this->whileStmt();
         if ($this->match(TokenType::FOR)) return $this->forStmt();
         if ($this->match(TokenType::BREAK)) return $this->breakStmt();
+        if ($this->match(TokenType::CONTINUE)) return $this->continueStmt();
 
         return $this->expressionStmt();
     }
@@ -213,7 +215,17 @@ class Parser
             return new BreakStmt();
         }
 
-        throw $this->error($this->previous(), "'break' só é permitido dentro de um laço");
+        throw $this->error($this->previous(), "'pare' só é permitido dentro de um laço");
+    }
+
+    private function continueStmt(): Stmt
+    {
+        if ($this->loopDepth > 0) {
+        $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+            return new ContinueStmt();
+        }
+
+        throw $this->error($this->previous(), "'continue' só é permitido dentro de um laço");
     }
 
     // EXPRESSIONS

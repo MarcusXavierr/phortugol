@@ -13,9 +13,19 @@ repita (var i = 10; i > 0; i = i - 1) {
 
 escreva 'agora vamos escrever somente os números pares';
 
-repita (var i = 0; i < 10; i = i + 2) {
+//repita (var i = 0; i < 10; i = i + 1) {
+//    se (i % 2 != 0) {
+//        continue;
+//    }
+//    escreva(i);
+//}
+
+var i = 0;
+enquanto (i < 10) {
     se (i % 2 != 0) {
+        i = i + 1;
         continue;
     }
     escreva(i);
+    i = i + 1;
 }
