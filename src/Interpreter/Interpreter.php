@@ -16,9 +16,7 @@ use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
 
-// TODO: Escrever alguns arquivos de teste (tipo de integração)
 // TODO: Adicionar a opção de ter lexemas UTF-8. E adicionar senão como um token de ELSE válido
-// TODO: Implementar a concatenação de strings e numeros
 // TODO: implementar ++ e -- para variáveis
 // TODO: Implementar NULLs
 class Interpreter

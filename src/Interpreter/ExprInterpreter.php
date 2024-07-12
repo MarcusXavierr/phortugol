@@ -65,7 +65,10 @@ class ExprInterpreter
                 if (is_numeric($left) && is_numeric($right)) {
                     return $left + $right;
                 }
-                throw new RuntimeError($expr->token, "Os operandos precisam ser ambos números ou strings");
+                if (is_string($left) || is_string($right)) {
+                    return $left . $right;
+                };
+                throw new RuntimeError($expr->token, "Os operandos precisam ser ambos números ou um deles precisa ser uma string");
 
             // Comparison operators
             case TokenType::GREATER:
