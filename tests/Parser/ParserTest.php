@@ -386,7 +386,17 @@ class ParserTest extends TestCase
                                     )
                                 )
                             )
-                        ])
+                        ]),
+                        new ExpressionStmt(
+                            new AssignExpr(
+                                token(TokenType::IDENTIFIER, 'i'),
+                                new BinaryExpr(
+                                    new VarExpr(token(TokenType::IDENTIFIER, 'i')),
+                                    token(TokenType::PLUS),
+                                    literal(1)
+                                )
+                            )
+                        )
                     )
                 ])
             ],

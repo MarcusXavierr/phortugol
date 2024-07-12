@@ -196,7 +196,8 @@ class Parser
 
             if (!$condition) $condition = new LiteralExpr(true);
 
-            $body = new WhileStmt($condition, $body);
+            $fallbackIncrement = $increment ? new ExpressionStmt($increment) : null;
+            $body = new WhileStmt($condition, $body, $fallbackIncrement);
 
             if ($initializer) {
                 $body = new BlockStmt([$initializer, $body]);

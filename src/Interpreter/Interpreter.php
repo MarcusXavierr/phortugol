@@ -8,7 +8,6 @@ use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
-use Phortugol\Stmt\BreakStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
@@ -17,8 +16,7 @@ use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
 
-// TODO: Implementar Break e Continue
-// TODO: Escrever alguns arrquivos de teste (tipo de integração)
+// TODO: Escrever alguns arquivos de teste (tipo de integração)
 // TODO: Adicionar a opção de ter lexemas UTF-8. E adicionar senão como um token de ELSE válido
 // TODO: Implementar a concatenação de strings e numeros
 // TODO: implementar ++ e -- para variáveis
@@ -126,6 +124,9 @@ class Interpreter
                     $this->execute($stmt->body);
                 } catch (ContinueException $e) {
                     // INFO: continues the loop
+                    if ($stmt->fallbackIncrement) {
+                        $this->execute($stmt->fallbackIncrement);
+                    }
                 }
             }
         } catch (BreakException $e) {

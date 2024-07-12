@@ -11,15 +11,16 @@ repita (var i = 10; i > 0; i = i - 1) {
     escreva(i);
 }
 
+escreva 'agora vamos escrever somente os números impares';
+
+repita (var i = 0; i < 10; i = i + 1) {
+    se (i % 2 == 0) {
+        continue;
+    }
+    escreva(i);
+}
+
 escreva 'agora vamos escrever somente os números pares';
-
-//repita (var i = 0; i < 10; i = i + 1) {
-//    se (i % 2 != 0) {
-//        continue;
-//    }
-//    escreva(i);
-//}
-
 var i = 0;
 enquanto (i < 10) {
     se (i % 2 != 0) {
