@@ -2,10 +2,12 @@
 
 namespace Phortugol\Interpreter;
 
+use Phortugol\Exceptions\BreakException;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
+use Phortugol\Stmt\BreakStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
@@ -14,8 +16,11 @@ use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
 
+// TODO: Implementar Break e Continue
 // TODO: Escrever alguns arrquivos de teste (tipo de integração)
 // TODO: Adicionar a opção de ter lexemas UTF-8. E adicionar senão como um token de ELSE válido
+// TODO: Implementar a concatenação de strings e numeros
+// TODO: implementar ++ e -- para variáveis
 // TODO: Implementar NULLs
 class Interpreter
 {
@@ -114,8 +119,17 @@ class Interpreter
 
     protected function handleWhile(WhileStmt $stmt): void
     {
-        while ($this->evaluate($stmt->condition)) {
-            $this->execute($stmt->body);
+        try {
+            while ($this->evaluate($stmt->condition)) {
+                $this->execute($stmt->body);
+            }
+        } catch (BreakException $e) {
+            // INFO: breaks the loop
         }
+    }
+
+    protected function handleBreak(BreakStmt $stmt): void
+    {
+        throw new BreakException();
     }
 }

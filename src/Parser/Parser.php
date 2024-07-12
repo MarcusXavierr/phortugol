@@ -15,6 +15,7 @@ use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
+use Phortugol\Stmt\BreakStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
@@ -29,6 +30,7 @@ class Parser
     /** @var Token[] $tokens */
     private array $tokens;
     private int $current = 0;
+    private int $loopDepth = 0;
 
     /**
      * @param Token[] $tokens
@@ -73,6 +75,7 @@ class Parser
         if ($this->match(TokenType::LEFT_BRACE)) return new BlockStmt($this->blockStatement());
         if ($this->match(TokenType::WHILE)) return $this->whileStmt();
         if ($this->match(TokenType::FOR)) return $this->forStmt();
+        if ($this->match(TokenType::BREAK)) return $this->breakStmt();
 
         return $this->expressionStmt();
     }
@@ -139,9 +142,13 @@ class Parser
         $condition = $this->expression();
         $this->validate(TokenType::RIGHT_PAREN, "É esperado um ')' após uma expressão de 'enquanto'.");
 
-        $body = $this->statement();
-
-        return new WhileStmt($condition, $body);
+        try {
+            $this->loopDepth++;
+            $body = $this->statement();
+            return new WhileStmt($condition, $body);
+        } finally {
+            $this->loopDepth--;
+        }
     }
 
     private function forStmt(): Stmt
@@ -172,26 +179,41 @@ class Parser
         }
         $this->validate(TokenType::RIGHT_PAREN, "É esperado um ')' após uma expressão de 'enquanto'.");
 
-        // Parse the body
-        $body = $this->statement();
+        try {
+            $this->loopDepth++;
+            // Parse the body
+            $body = $this->statement();
 
-        // Now, mount the while loop with these parsed pieces, working backwards on the for
-        if ($increment) {
-            $body = new BlockStmt([
-                $body,
-                new ExpressionStmt($increment)
-            ]);
+            // Now, mount the while loop with these parsed pieces, working backwards on the for
+            if ($increment) {
+                $body = new BlockStmt([
+                    $body,
+                    new ExpressionStmt($increment)
+                ]);
+            }
+
+            if (!$condition) $condition = new LiteralExpr(true);
+
+            $body = new WhileStmt($condition, $body);
+
+            if ($initializer) {
+                $body = new BlockStmt([$initializer, $body]);
+            }
+
+            return $body;
+        } finally {
+            $this->loopDepth--;
+        }
+    }
+
+    private function breakStmt(): Stmt
+    {
+        if ($this->loopDepth > 0) {
+        $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+            return new BreakStmt();
         }
 
-        if (!$condition) $condition = new LiteralExpr(true);
-
-        $body = new WhileStmt($condition, $body);
-
-        if ($initializer) {
-            $body = new BlockStmt([$initializer, $body]);
-        }
-
-        return $body;
+        throw $this->error($this->previous(), "'break' só é permitido dentro de um laço");
     }
 
     // EXPRESSIONS

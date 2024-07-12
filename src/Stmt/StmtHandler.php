@@ -22,6 +22,7 @@ trait StmtHandler
             $stmt instanceof BlockStmt => $this->handleBlockStmt($stmt),
             $stmt instanceof IfStmt => $this->handleIf($stmt),
             $stmt instanceof WhileStmt => $this->handleWhile($stmt),
+            $stmt instanceof BreakStmt => $this->handleBreak($stmt),
             default => throw new Exception("Incomplete statement implementation")
         };
     }
@@ -55,4 +56,9 @@ trait StmtHandler
      * @return T
      */
     protected abstract function handleWhile(WhileStmt $stmt);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleBreak(BreakStmt $stmt);
 }

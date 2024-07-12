@@ -16,6 +16,7 @@ use Phortugol\Expr\VarExpr;
 use Phortugol\Parser\Parser;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
+use Phortugol\Stmt\BreakStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
@@ -170,6 +171,18 @@ class ParserTest extends TestCase
                 )
             ],
         ];
+    }
+
+    public function test_throw_error_on_break_outside_loop(): void
+    {
+        $tokens = [
+            token(TokenType::BREAK),
+            token(TokenType::SEMICOLON),
+        ];
+
+        $parser = new Parser($this->errorHelper, $tokens);
+        $parser->parse();
+        $this->assertTrue($this->errorHelper->hadError);
     }
 
     /**
@@ -376,6 +389,24 @@ class ParserTest extends TestCase
                     )
                 ])
             ],
+            "should parse break statement" => [
+                "tokens" => [
+                    token('enquanto'),
+                    token('('),
+                    token(TokenType::TRUE),
+                    token(')'),
+                    token('{'),
+                    token('pare'),
+                    token(';'),
+                    token('}'),
+                ],
+                "expected" => new WhileStmt(
+                    new LiteralExpr(true),
+                    new BlockStmt([
+                        new BreakStmt()
+                    ])
+                )
+            ]
         ];
     }
 
