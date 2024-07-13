@@ -10,11 +10,14 @@ use Phortugol\Token;
 
 class LiteralsScanner
 {
-    private string $source;
+    private array $source;
     private int $line = 1;
     private ErrorHelper $error;
 
-    public function __construct(string $source, ErrorHelper $errorHelper)
+    /**
+     * @param string[] $source
+     */
+    public function __construct(array $source, ErrorHelper $errorHelper)
     {
         $this->source = $source;
         $this->error = $errorHelper;
@@ -41,8 +44,8 @@ class LiteralsScanner
         // The closing ".
         $current++;
 
-        $value = StringHelper::substring($this->source, $start + 1, $current - 1);
-        $lexeme = StringHelper::substring($this->source, $start, $current);
+        $value = StringHelper::arrSubstring($this->source, $start + 1, $current - 1);
+        $lexeme = StringHelper::arrSubstring($this->source, $start, $current);
         return [
             $current,
             new Token(TokenType::STRING, $value, $lexeme, $this->line)
@@ -68,8 +71,8 @@ class LiteralsScanner
             }
         }
 
-        $value = StringHelper::substring($this->source, $start, $current);
-        $lexeme = StringHelper::substring($this->source, $start, $current);
+        $value = StringHelper::arrSubstring($this->source, $start, $current);
+        $lexeme = StringHelper::arrSubstring($this->source, $start, $current);
         return [
             $current,
             new Token(TokenType::NUMBER, (float) $value, $lexeme, $this->line)
@@ -81,14 +84,14 @@ class LiteralsScanner
     public function identifier(int $start, int $current): array
     {
         while (!$this->isAtEnd($current)) {
-            if (!ctype_alnum($this->source[$current]) && $this->source[$current] !== '_') {
+            $char = $this->source[$current];
+            if (!validLexeme($char)) {
                 break;
             }
-            $current++;
+            $current += strlen($char);
         }
 
-        // TODO: Validate why console.log returns IDENTIFIER IDENTIFIER DOT instead of IDENTIFIER DOT IDENTIFIER
-        $lexeme = StringHelper::substring($this->source, $start, $current);
+        $lexeme = StringHelper::arrSubstring($this->source, $start, $current);
         $kind = ScannerKeywords::KEYWORDS[$lexeme] ?? TokenType::IDENTIFIER;
         return [
             $current,
@@ -98,6 +101,12 @@ class LiteralsScanner
 
     private function isAtEnd(int $current): bool
     {
-        return $current >= strlen($this->source);
+        return $current >= count($this->source);
     }
+}
+
+function validLexeme(string $str): bool
+{
+    $pattern = '/^[\p{L}\p{N}]*$/u';
+    return preg_match($pattern, $str) ? true : false;
 }

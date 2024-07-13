@@ -4,11 +4,13 @@ namespace Phortugol\Scanner;
 
 use Phortugol\Enums\TokenType;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\Helpers\StringHelper;
 use Phortugol\Token;
 
 class Scanner
 {
-    private readonly string $source;
+    /** @var string[] */
+    private readonly array$source;
     /** @var Token[] */
     private array $tokens = [];
     private int $start = 0;
@@ -19,9 +21,9 @@ class Scanner
 
     public function __construct(string $source, ErrorHelper $errorHelper)
     {
-        $this->source = $source;
+        $this->source = StringHelper::splitString($source);
         $this->error = $errorHelper;
-        $this->literalsScanner = new LiteralsScanner($source, $errorHelper);
+        $this->literalsScanner = new LiteralsScanner($this->source, $this->error);
     }
 
     /**
@@ -139,8 +141,7 @@ class Scanner
 
     private function pushToken(TokenType $kind, mixed $literal): void
     {
-        $lexemeSize = $this->current - $this->start;
-        $lexeme = substr($this->source, $this->start, $lexemeSize);
+        $lexeme = StringHelper::arrSubstring($this->source, $this->start, $this->current);
 
         $this->tokens[] = new Token($kind, $literal, $lexeme, $this->line);
     }
@@ -169,6 +170,6 @@ class Scanner
 
     private function isAtEnd(): bool
     {
-        return $this->current >= strlen($this->source);
+        return $this->current >= count($this->source);
     }
 }

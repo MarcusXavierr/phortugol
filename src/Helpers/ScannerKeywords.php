@@ -24,6 +24,7 @@ class ScannerKeywords
         'continue' => TokenType::CONTINUE,
         'escreva' => TokenType::PRINT,
         'leia' => TokenType::READ,
+        'senão' => TokenType::ELSE,
         // 'let' => TokenType::LET,
         // 'const' => TokenType::CONST,
     ];

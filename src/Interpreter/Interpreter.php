@@ -16,7 +16,6 @@ use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
 
-// TODO: Adicionar a opção de ter lexemas UTF-8. E adicionar senão como um token de ELSE válido
 // TODO: implementar ++ e -- para variáveis
 // TODO: Implementar NULLs
 class Interpreter
@@ -36,6 +35,7 @@ class Interpreter
         $this->environment = new Environment(null);
         $this->exprInterpreter = new ExprInterpreter($this->errorHelper, $this->environment);
     }
+
     /**
      * @param Stmt[] $statements
      */
