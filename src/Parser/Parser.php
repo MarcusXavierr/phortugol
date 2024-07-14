@@ -80,12 +80,6 @@ class Parser
         if ($this->match(TokenType::BREAK)) return $this->breakStmt();
         if ($this->match(TokenType::CONTINUE)) return $this->continueStmt();
 
-        // parsing ++ and -- for variables and desugaring to +=/-=
-        if ($this->check(TokenType::IDENTIFIER)) {
-            if ($this->peekNext()->kind == TokenType::PLUS_PLUS || $this->peekNext()->kind == TokenType::MINUS_MINUS) {
-                return $this->postfixStatement();
-            }
-        }
 
         return $this->expressionStmt();
     }
@@ -118,6 +112,13 @@ class Parser
 
     private function expressionStmt(): Stmt
     {
+        // parsing ++ and -- for variables and desugaring to +=/-=
+        if ($this->check(TokenType::IDENTIFIER)) {
+            if ($this->peekNext()->kind == TokenType::PLUS_PLUS || $this->peekNext()->kind == TokenType::MINUS_MINUS) {
+                return $this->postfixStatement();
+            }
+        }
+
         $expr = $this->expression();
         $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
         return new ExpressionStmt($expr);
@@ -184,7 +185,7 @@ class Parser
         // increment
         $increment = null;
         if (!$this->check(TokenType::RIGHT_PAREN)) {
-            $increment = $this->expression();
+            $increment = $this->expressionStmt();
         }
         $this->validate(TokenType::RIGHT_PAREN, "É esperado um ')' após uma expressão de 'enquanto'.");
 
@@ -197,14 +198,12 @@ class Parser
             if ($increment) {
                 $body = new BlockStmt([
                     $body,
-                    new ExpressionStmt($increment)
+                    $increment
                 ]);
             }
 
             if (!$condition) $condition = new LiteralExpr(true);
-
-            $fallbackIncrement = $increment ? new ExpressionStmt($increment) : null;
-            $body = new WhileStmt($condition, $body, $fallbackIncrement);
+            $body = new WhileStmt($condition, $body, $increment);
 
             if ($initializer) {
                 $body = new BlockStmt([$initializer, $body]);
