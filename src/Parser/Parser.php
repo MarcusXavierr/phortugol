@@ -36,19 +36,20 @@ class Parser
     /**
      * @param Token[] $tokens
      */
-    public function __construct(ErrorHelper $error, array $tokens) {
+    public function __construct(ErrorHelper $error, array $tokens)
+    {
         $this->errorHelper = $error;
         $this->tokens = $tokens;
     }
 
     /**
-    * @return Stmt|null[]|null
-    */
-    public function parse(): array | null
+     * @return Stmt|null[]|null
+     */
+    public function parse(): array|null
     {
         $declarations = [];
         try {
-            while(!$this->isAtEnd()) {
+            while (!$this->isAtEnd()) {
                 array_push($declarations, $this->declaration());
             }
             return $declarations;
@@ -79,6 +80,13 @@ class Parser
         if ($this->match(TokenType::BREAK)) return $this->breakStmt();
         if ($this->match(TokenType::CONTINUE)) return $this->continueStmt();
 
+        // parsing ++ and -- for variables and desugaring to +=/-=
+        if ($this->check(TokenType::IDENTIFIER)) {
+            if ($this->peekNext()->kind == TokenType::PLUS_PLUS || $this->peekNext()->kind == TokenType::MINUS_MINUS) {
+                return $this->postfixStatement();
+            }
+        }
+
         return $this->expressionStmt();
     }
 
@@ -88,7 +96,7 @@ class Parser
     private function blockStatement(): array
     {
         $declarations = [];
-        while(!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
+        while (!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
             $declarations[] = $this->declaration();
         }
 
@@ -160,8 +168,7 @@ class Parser
         $initializer = null;
         if ($this->match(TokenType::SEMICOLON)) {
             $initializer = null;
-        }
-        else if ($this->match(TokenType::VAR)) {
+        } else if ($this->match(TokenType::VAR)) {
             $initializer = $this->varDeclaration();
         } else {
             $initializer = $this->expressionStmt();
@@ -212,7 +219,7 @@ class Parser
     private function breakStmt(): Stmt
     {
         if ($this->loopDepth > 0) {
-        $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+            $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
             return new BreakStmt();
         }
 
@@ -222,11 +229,29 @@ class Parser
     private function continueStmt(): Stmt
     {
         if ($this->loopDepth > 0) {
-        $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+            $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
             return new ContinueStmt();
         }
 
         throw $this->error($this->previous(), "'continue' só é permitido dentro de um laço");
+    }
+
+    private function postfixStatement(): Stmt
+    {
+        $identifier = $this->advance();
+        $token = $this->advance();
+        $this->match(TokenType::SEMICOLON); // consume the semicolon (if it exists)
+        $operator = $token->kind == TokenType::PLUS_PLUS ? TokenType::PLUS : TokenType::MINUS;
+        $operationToken = new Token($operator, null, $operator->value, $token->line);
+
+        return new ExpressionStmt(
+            new AssignExpr(
+                $identifier,
+                new BinaryExpr(
+                    new VarExpr($identifier), $operationToken, new LiteralExpr(1)
+                )
+            )
+        );
     }
 
     // EXPRESSIONS
@@ -273,7 +298,7 @@ class Parser
     {
         $expr = $this->logic_and();
 
-        while($this->match(TokenType::OR)) {
+        while ($this->match(TokenType::OR)) {
             $operator = $this->previous();
             $right = $this->logic_and();
 
@@ -287,7 +312,7 @@ class Parser
     {
         $expr = $this->equality();
 
-        while($this->match(TokenType::AND)) {
+        while ($this->match(TokenType::AND)) {
             $operator = $this->previous();
             $right = $this->equality();
 
@@ -300,7 +325,7 @@ class Parser
     private function equality(): Expr
     {
         $expr = $this->comparison();
-        while($this->match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
+        while ($this->match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
             $operator = $this->previous();
             $right = $this->comparison();
             $expr = new BinaryExpr($expr, $operator, $right);
@@ -313,7 +338,7 @@ class Parser
     {
         $expr = $this->term();
 
-        while($this->match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
+        while ($this->match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
             $operator = $this->previous();
             $right = $this->term();
             $expr = new BinaryExpr($expr, $operator, $right);
@@ -326,7 +351,7 @@ class Parser
     {
         $expr = $this->factor();
 
-        while($this->match(TokenType::MINUS, TokenType::PLUS)) {
+        while ($this->match(TokenType::MINUS, TokenType::PLUS)) {
             $operator = $this->previous();
             $right = $this->factor();
             $expr = new BinaryExpr($expr, $operator, $right);
@@ -338,7 +363,7 @@ class Parser
     private function factor(): Expr
     {
         $expr = $this->unary();
-        while($this->match(TokenType::STAR, TokenType::SLASH, TokenType::MODULO)) {
+        while ($this->match(TokenType::STAR, TokenType::SLASH, TokenType::MODULO)) {
             $operator = $this->previous();
             $right = $this->unary();
             $expr = new BinaryExpr($expr, $operator, $right);
@@ -391,7 +416,7 @@ class Parser
 
     private function match(TokenType ...$kinds): bool
     {
-        foreach($kinds as $kind) {
+        foreach ($kinds as $kind) {
             if ($this->check($kind)) {
                 $this->current++;
                 return true;
@@ -404,10 +429,10 @@ class Parser
     private function sincronize(): void
     {
         $this->advance();
-        while(!$this->isAtEnd()) {
+        while (!$this->isAtEnd()) {
             if ($this->previous()->kind == TokenType::SEMICOLON) return;
 
-            switch($this->peek()->kind) {
+            switch ($this->peek()->kind) {
                 case TokenType::FUNCTION:
                 case TokenType::VAR:
                 case TokenType::FOR:
@@ -454,6 +479,15 @@ class Parser
     private function previous(): Token
     {
         return $this->tokens[$this->current - 1];
+    }
+
+    private function peekNext(): Token
+    {
+        if ($this->current + 1 < count($this->tokens)) {
+            return $this->tokens[$this->current + 1];
+        }
+
+        return $this->tokens[count($this->tokens) - 1];
     }
 
     private function isAtEnd(): bool

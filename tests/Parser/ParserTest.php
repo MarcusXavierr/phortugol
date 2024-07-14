@@ -417,7 +417,59 @@ class ParserTest extends TestCase
                         new BreakStmt()
                     ])
                 )
-            ]
+            ],
+            "should parse continue statement" => [
+                "tokens" => [
+                    token('enquanto'),
+                    token('('),
+                    token(TokenType::TRUE),
+                    token(')'),
+                    token('{'),
+                    token('continue'),
+                    token(';'),
+                    token('}'),
+                ],
+                "expected" => new WhileStmt(
+                    literal(true),
+                    new BlockStmt([
+                        new ContinueStmt()
+                    ])
+                )
+            ],
+            "should parse ++ and -- statements as variable assignment with increment or decrement by 1" => [
+                "tokens" => [
+                    token("{"),
+                    token(TokenType::IDENTIFIER, 'a'),
+                    token("++"),
+                    token(';'),
+                    token(TokenType::IDENTIFIER, 'a'),
+                    token("--"),
+                    token(';'),
+                    token('}')
+                ],
+                "expected" => new BlockStmt([
+                    new ExpressionStmt(
+                        new AssignExpr(
+                            token(TokenType::IDENTIFIER, 'a'),
+                            new BinaryExpr(
+                                new VarExpr(token(TokenType::IDENTIFIER, 'a')),
+                                token(TokenType::PLUS),
+                                literal(1)
+                            )
+                        )
+                    ),
+                    new ExpressionStmt(
+                        new AssignExpr(
+                            token(TokenType::IDENTIFIER, 'a'),
+                            new BinaryExpr(
+                                new VarExpr(token(TokenType::IDENTIFIER, 'a')),
+                                token(TokenType::MINUS),
+                                literal(1)
+                            )
+                        )
+                    ),
+                ])
+            ],
         ];
     }
 
