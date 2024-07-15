@@ -112,15 +112,10 @@ class Parser
 
     private function expressionStmt(): Stmt
     {
-        // parsing ++ and -- for variables and desugaring to +=/-=
-        if ($this->check(TokenType::IDENTIFIER)) {
-            if ($this->peekNext()->kind == TokenType::PLUS_PLUS || $this->peekNext()->kind == TokenType::MINUS_MINUS) {
-                return $this->postfixStatement();
-            }
-        }
-
         $expr = $this->expression();
-        $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+        $this->match(TokenType::SEMICOLON);
+        // FIX: Não posso validar o ';' por causa da sintaxe do for de incremento. e nõa posso mover o parsing do ++ para uma expressão
+        // $this->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
         return new ExpressionStmt($expr);
     }
 
@@ -185,7 +180,7 @@ class Parser
         // increment
         $increment = null;
         if (!$this->check(TokenType::RIGHT_PAREN)) {
-            $increment = $this->expressionStmt();
+            $increment = new ExpressionStmt($this->expression());
         }
         $this->validate(TokenType::RIGHT_PAREN, "É esperado um ')' após uma expressão de 'enquanto'.");
 
@@ -235,7 +230,7 @@ class Parser
         throw $this->error($this->previous(), "'continue' só é permitido dentro de um laço");
     }
 
-    private function postfixStatement(): Stmt
+    private function postfixVarIncrementDecrement(): Expr
     {
         $identifier = $this->advance();
         $token = $this->advance();
@@ -243,12 +238,10 @@ class Parser
         $operator = $token->kind == TokenType::PLUS_PLUS ? TokenType::PLUS : TokenType::MINUS;
         $operationToken = new Token($operator, null, $operator->value, $token->line);
 
-        return new ExpressionStmt(
-            new AssignExpr(
-                $identifier,
-                new BinaryExpr(
-                    new VarExpr($identifier), $operationToken, new LiteralExpr(1)
-                )
+        return new AssignExpr(
+            $identifier,
+            new BinaryExpr(
+                new VarExpr($identifier), $operationToken, new LiteralExpr(1)
             )
         );
     }
@@ -256,6 +249,13 @@ class Parser
     // EXPRESSIONS
     private function expression(): Expr
     {
+        // parsing ++ and -- for variables and desugaring to +=/-=
+        if ($this->check(TokenType::IDENTIFIER)) {
+            if ($this->peekNext()->kind == TokenType::PLUS_PLUS || $this->peekNext()->kind == TokenType::MINUS_MINUS) {
+                return $this->postfixVarIncrementDecrement();
+            }
+        }
+
         return $this->assignment();
     }
 
