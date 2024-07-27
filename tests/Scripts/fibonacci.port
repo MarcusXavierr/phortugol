@@ -1,8 +1,15 @@
-var a = 0;
-var temp;
+função fibonacci(n) {
+  se (n <= 0) retorne 0;
+  se (n <= 1) retorne 1;
 
-repita (var b = 1; a < 10000; b = temp + b) {
-  escreva a;
-  temp = a;
-  a = b;
+  retorne fibonacci(n - 1) + fibonacci(n - 2);
 }
+
+var now = relogio();
+
+repita (var i = 1; i < 25; i++) {
+    escreva fibonacci(i);
+}
+
+
+escreva "se passaram " + (relogio() - now) + " segundos";

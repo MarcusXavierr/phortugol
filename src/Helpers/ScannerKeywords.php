@@ -12,6 +12,7 @@ class ScannerKeywords
         'falso' => TokenType::FALSE,
         'repita' => TokenType::FOR,
         'funcao' => TokenType::FUNCTION,
+        'função' => TokenType::FUNCTION,
         'se' => TokenType::IF,
         'nulo' => TokenType::NULL,
         'indefinido' => TokenType::UNDEFINED,
