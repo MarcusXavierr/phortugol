@@ -23,6 +23,7 @@ trait ExprHandler
             $expr instanceof VarExpr => $this->handleVarExpr($expr),
             $expr instanceof AssignExpr => $this->handleAssignExpr($expr),
             $expr instanceof LogicalExpr => $this->handleLogicalExpr($expr),
+            $expr instanceof CallExpr => $this->handleCallExpr($expr),
             default => throw new Exception("Incomplete expression implementation")
         };
     }
@@ -66,4 +67,9 @@ trait ExprHandler
      * @return T
      */
     protected abstract function handleLogicalExpr(LogicalExpr $expr);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleCallExpr(CallExpr $expr);
 }

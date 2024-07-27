@@ -1,0 +1,43 @@
+funcao Banco() {
+    var saldo = 0;
+
+    funcao getSaldo() {
+        retorne saldo;
+    }
+
+    funcao incrementaSaldo() {
+        saldo++;
+    }
+
+    funcao ramal(opção) {
+        se (opção == "get") {
+            retorne getSaldo();
+        }
+        se (opção == "inc") {
+            incrementaSaldo();
+        }
+    }
+
+    retorne ramal;
+}
+
+var banco = Banco();
+banco("inc");
+banco("inc");
+escreva "O saldo do banco é: " + banco("get");
+banco("inc");
+escreva "O saldo do banco agora é: " + banco("get");
+
+// funcao façaCounter() {
+//     var i = 0;
+//     funcao count() {
+//         i++;
+//         escreva i;
+//     }
+//
+//     retorne count;
+// }
+//
+// var counter = façaCounter();
+// counter();
+// counter();

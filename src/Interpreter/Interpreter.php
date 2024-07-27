@@ -4,13 +4,18 @@ namespace Phortugol\Interpreter;
 
 use Phortugol\Exceptions\BreakException;
 use Phortugol\Exceptions\ContinueException;
+use Phortugol\Exceptions\ReturnException;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\NativeFunctions\Clock;
+use Phortugol\NativeFunctions\PhortugolFunction;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\FunctionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
+use Phortugol\Stmt\ReturnStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
@@ -26,14 +31,17 @@ class Interpreter
     private readonly ErrorHelper $errorHelper;
     private readonly TypeValidator $typeValidator;
     private readonly ExprInterpreter $exprInterpreter;
-    private Environment $environment;
+    public readonly Environment $globals;
+    public Environment $environment;
 
     public function __construct(ErrorHelper $errorHelper)
     {
         $this->errorHelper = $errorHelper;
         $this->typeValidator = new TypeValidator();
-        $this->environment = new Environment(null);
-        $this->exprInterpreter = new ExprInterpreter($this->errorHelper, $this->environment);
+        $this->globals = new Environment(null);
+        $this->environment = $this->globals;
+        $this->exprInterpreter = new ExprInterpreter($this->errorHelper, $this->environment, $this);
+        $this->mountNativeFunctions();
     }
 
     /**
@@ -89,19 +97,7 @@ class Interpreter
 
     protected function handleBlockStmt(BlockStmt $stmt): void
     {
-        $previous = $this->environment;
-        $block = new Environment($this->environment);
-        try {
-            $this->environment = $block;
-            $this->exprInterpreter->setEnvironment($block);
-            foreach($stmt->declarations as $declaration) {
-                $this->execute($declaration);
-            }
-        } finally {
-            // INFO: restore environment
-            $this->environment = $previous;
-            $this->exprInterpreter->setEnvironment($previous);
-        }
+        $this->executeBlock($stmt->declarations, new Environment($this->environment));
     }
 
     protected function handleIf(IfStmt $stmt): void
@@ -140,5 +136,48 @@ class Interpreter
     protected function handleContinue(): void
     {
         throw new ContinueException();
+    }
+
+    protected function handleFunctionStmt(FunctionStmt $stmt): void
+    {
+        $function = new PhortugolFunction($stmt, $this->environment);
+        $this->environment->define($stmt->name->lexeme, $function);
+    }
+
+    protected function handleReturnStmt(ReturnStmt $stmt): void
+    {
+        $value = null;
+        if ($stmt->value) {
+            $value = $this->exprInterpreter->evaluate($stmt->value);
+        }
+
+        throw new ReturnException($value);
+    }
+
+    /**
+     * @param Stmt[] $statements
+     */
+    public function executeBlock(array $statements, Environment $block): void
+    {
+        $previous = $this->environment;
+
+        try {
+            $this->environment = $block;
+            $this->exprInterpreter->setEnvironment($block);
+            foreach($statements as $stmt) {
+                $this->execute($stmt);
+            }
+        } finally {
+            // INFO: restore environment
+            $this->environment = $previous;
+            $this->exprInterpreter->setEnvironment($previous);
+        }
+
+    }
+
+    private function mountNativeFunctions(): void
+    {
+        $this->globals->define("relógio", new Clock());
+        $this->globals->define("relogio", new Clock());
     }
 }

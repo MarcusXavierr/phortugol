@@ -3,6 +3,7 @@
 namespace Phortugol\Parser;
 
 use Phortugol\Enums\TokenType;
+use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
@@ -175,7 +176,38 @@ class ExprParser
             return new UnaryExpr($operator, $expr);
         }
 
-        return $this->primary();
+        return $this->call();
+    }
+
+    private function call(): Expr
+    {
+        $expr = $this->primary();
+
+        while (true) {
+            if ($this->helper->match(TokenType::LEFT_PAREN)) {
+                $expr = $this->finishCall($expr);
+            } else {
+                break;
+            }
+        }
+
+        return $expr;
+    }
+
+    private function finishCall(Expr $callee): Expr
+    {
+        $arguments = [];
+        if (!$this->helper->check(TokenType::RIGHT_PAREN)) {
+            do {
+                if (count($arguments) > 255) {
+                    $this->helper->error($this->helper->peek(), "Não é possível ter mais de 255 argumentos");
+                }
+                array_push($arguments, $this->expression());
+            } while($this->helper->match(TokenType::COMMA));
+        }
+
+        $paren = $this->helper->validate(TokenType::RIGHT_PAREN, "Experado ')' depois da chamada de uma função");
+        return new CallExpr($callee, $paren, $arguments);
     }
 
     private function primary(): Expr

@@ -6,6 +6,7 @@ use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
+use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\ExprHandler;
 use Phortugol\Expr\GroupingExpr;
@@ -23,9 +24,11 @@ class ExprInterpreter
     private readonly ErrorHelper $errorHelper;
     private readonly TypeValidator $typeValidator;
     private Environment $environment;
+    private readonly Interpreter $interpreter;
 
-    public function __construct(ErrorHelper $errorHelper, Environment $environment)
+    public function __construct(ErrorHelper $errorHelper, Environment $environment, Interpreter $interpreter)
     {
+        $this->interpreter = $interpreter;
         $this->errorHelper = $errorHelper;
         $this->typeValidator = new TypeValidator();
         $this->environment = $environment;
@@ -146,5 +149,25 @@ class ExprInterpreter
         }
 
         return $this->evaluate($expr->right);
+    }
+
+    protected function handleCallExpr(CallExpr $expr): mixed
+    {
+        $callee = $this->evaluate($expr->callee);
+
+        $arguments = [];
+        foreach ($expr->arguments as $argument) {
+            array_push($arguments, $this->evaluate($argument));
+        }
+
+        if ($callee instanceof PhortCallable) {
+            $countArguments = count($arguments);
+            if ($countArguments != $callee->arity()) {
+                throw new RuntimeError($expr->paren, "Experado {$callee->arity()} argumentos, mas recebi {$countArguments} argumento(s).");
+            }
+            return $callee->call($this->interpreter, $arguments);
+        }
+
+        throw new RuntimeError($expr->paren, "Só é possível chamar funções ou classes");
     }
 }

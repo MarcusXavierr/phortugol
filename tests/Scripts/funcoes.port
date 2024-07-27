@@ -1,0 +1,10 @@
+função rodaFunção(funçãoCallback, a, b) {
+    funçãoCallback(a, b);
+}
+
+função somaNúmeros(a, b) {
+    var resultado = a + b;
+    escreva 'O resultado de ' + a + ' + ' + b + ' é: ' + resultado;
+}
+
+rodaFunção(somaNúmeros, 2, 2);

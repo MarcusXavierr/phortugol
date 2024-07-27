@@ -10,8 +10,10 @@ use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\BreakStmt;
 use Phortugol\Stmt\ContinueStmt;
 use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\FunctionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
+use Phortugol\Stmt\ReturnStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
@@ -70,6 +72,8 @@ class Parser
         if ($this->helper->match(TokenType::FOR)) return $this->forStmt();
         if ($this->helper->match(TokenType::BREAK)) return $this->breakStmt();
         if ($this->helper->match(TokenType::CONTINUE)) return $this->continueStmt();
+        if ($this->helper->match(TokenType::FUNCTION)) return $this->function('função');
+        if ($this->helper->match(TokenType::RETURN)) return $this->returnStmt();
 
         return $this->expressionStmt();
     }
@@ -217,6 +221,41 @@ class Parser
             return new ContinueStmt();
         }
 
-        throw $this->helper->error($this->helper->previous(), "'continue' só é permitido dentro de um laço");
+        throw $this->helper->error($this->helper->previous(), "'continue' só é permitido dentro de um laço.");
+    }
+
+    private function function(string $kind): Stmt
+    {
+        $name = $this->helper->validate(TokenType::IDENTIFIER, "É esperado um nome para a declaração de {$kind}.");
+
+        $this->helper->validate(TokenType::LEFT_PAREN, "É esperado um '(' antes dos parâmetros.");
+        $parameters = [];
+        if (!$this->helper->check(TokenType::RIGHT_PAREN)) {
+            do {
+                if (count($parameters) > 255) {
+                    $this->helper->error($this->helper->peek(), "Não é possível ter mais de 255 parâmetros.");
+                }
+
+                array_push($parameters, $this->helper->validate(TokenType::IDENTIFIER, "Experado o nome de um parâmetro."));
+           } while ($this->helper->match(TokenType::COMMA));
+        }
+
+        $this->helper->validate(TokenType::RIGHT_PAREN, "É esperado um ')' depois dos parâmetros.");
+        $this->helper->validate(TokenType::LEFT_BRACE, "É esperado um '{'");
+
+        $body = $this->blockStatement();
+        return new FunctionStmt($name, $parameters, $body);
+    }
+
+    private function returnStmt(): Stmt
+    {
+        $keyword = $this->helper->previous();
+        $expr = null;
+        if (!$this->helper->check(TokenType::SEMICOLON)) {
+            $expr = $this->exprParser->expression();
+        }
+        $this->helper->validate(TokenType::SEMICOLON, "É esperado um ';' no fim de um statement de retorno");
+
+        return new ReturnStmt($keyword, $expr);
     }
 }

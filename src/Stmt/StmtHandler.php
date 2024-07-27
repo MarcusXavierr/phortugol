@@ -24,6 +24,8 @@ trait StmtHandler
             $stmt instanceof WhileStmt => $this->handleWhile($stmt),
             $stmt instanceof BreakStmt => $this->handleBreak(),
             $stmt instanceof ContinueStmt => $this->handleContinue(),
+            $stmt instanceof FunctionStmt => $this->handleFunctionStmt($stmt),
+            $stmt instanceof ReturnStmt => $this->handleReturnStmt($stmt),
             default => throw new Exception("Incomplete statement implementation")
         };
     }
@@ -67,4 +69,14 @@ trait StmtHandler
      * @return T
      */
     protected abstract function handleContinue();
+
+    /**
+     * @return T
+     */
+    protected abstract function handleFunctionStmt(FunctionStmt $stmt);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleReturnStmt(ReturnStmt $stmt);
 }
