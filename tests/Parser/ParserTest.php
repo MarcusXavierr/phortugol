@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Phortugol\Enums\TokenType;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
+use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LiteralExpr;
@@ -19,6 +20,7 @@ use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\BreakStmt;
 use Phortugol\Stmt\ContinueStmt;
 use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\FunctionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
 use Phortugol\Stmt\Stmt;
@@ -171,6 +173,22 @@ class ParserTest extends TestCase
                     literal(10),
                 )
             ],
+            "should parse function call" => [
+                "tokens" => [
+                    token(TokenType::IDENTIFIER, 'fib'),
+                    token("("),
+                    numToken(10),
+                    token(")"),
+                    token(";")
+                ],
+                "expected" => new CallExpr(
+                    new VarExpr(token(TokenType::IDENTIFIER, 'fib')),
+                    token(")"),
+                    [
+                        literal(10)
+                    ]
+                )
+            ]
         ];
     }
 
@@ -469,6 +487,27 @@ class ParserTest extends TestCase
                         )
                     ),
                 ])
+            ],
+            "should parse a function declaration" => [
+                "tokens" => [
+                    token('funcao'),
+                    token(TokenType::IDENTIFIER, 'fib'),
+                    token('('),
+                    token(TokenType::IDENTIFIER, 'n'),
+                    token(')'),
+                    token('{'),
+                    token('escreva'),
+                    token(TokenType::STRING, 'não vai ter resultado'),
+                    token(';'),
+                    token('}'),
+                ],
+                "expected" => new FunctionStmt(
+                    token(TokenType::IDENTIFIER, 'fib'),
+                    [ token(TokenType::IDENTIFIER, 'n') ],
+                    [
+                        new PrintStmt(literal('não vai ter resultado'))
+                    ]
+                )
             ],
         ];
     }
