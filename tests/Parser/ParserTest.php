@@ -23,6 +23,7 @@ use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\FunctionStmt;
 use Phortugol\Stmt\IfStmt;
 use Phortugol\Stmt\PrintStmt;
+use Phortugol\Stmt\ReturnStmt;
 use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
@@ -506,6 +507,27 @@ class ParserTest extends TestCase
                     [ token(TokenType::IDENTIFIER, 'n') ],
                     [
                         new PrintStmt(literal('não vai ter resultado'))
+                    ]
+                )
+            ],
+            "should parse a function declaration with return statement" => [
+                "tokens" => [
+                    token('funcao'),
+                    token(TokenType::IDENTIFIER, 'fib'),
+                    token('('),
+                    token(TokenType::IDENTIFIER, 'n'),
+                    token(')'),
+                    token('{'),
+                    token('retorne'),
+                    token(TokenType::NUMBER, 1),
+                    token(';'),
+                    token('}'),
+                ],
+                "expected" => new FunctionStmt(
+                    token(TokenType::IDENTIFIER, 'fib'),
+                    [ token(TokenType::IDENTIFIER, 'n') ],
+                    [
+                        new ReturnStmt(token('retorne'), literal(1))
                     ]
                 )
             ],
