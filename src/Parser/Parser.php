@@ -4,6 +4,7 @@ namespace Phortugol\Parser;
 
 use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\ParserError;
+use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
@@ -32,7 +33,7 @@ class Parser
     public function __construct(ErrorHelper $error, array $tokens)
     {
         $this->helper = new ParserHelper($error, $tokens, $this->current);
-        $this->exprParser = new ExprParser($this->helper);
+        $this->exprParser = new ExprParser($this->helper, $this);
     }
 
     /**
@@ -81,7 +82,7 @@ class Parser
     /**
      * @return Stmt[]
      */
-    private function blockStatement(): array
+    public function blockStatement(): array
     {
         $declarations = [];
         while (!$this->helper->check(TokenType::RIGHT_BRACE) && !$this->helper->isAtEnd()) {
@@ -100,7 +101,7 @@ class Parser
             $initializer = $this->exprParser->expression();
         }
 
-        $this->helper->validate(TokenType::SEMICOLON, "Esperado um ';' após declarar uma variavel");
+        $this->helper->validateSemicolon($initializer, "Esperado um ';' após declarar uma variavel");
         return new VarStmt($identifier->lexeme, $initializer);
     }
 
@@ -117,7 +118,7 @@ class Parser
     private function printStmt(): Stmt
     {
         $expr = $this->exprParser->expression();
-        $this->helper->validate(TokenType::SEMICOLON, "É esperado um ';' no fim da expressão");
+        $this->helper->validateSemicolon($expr, "É esperado um ';' no fim da expressão");
         return new PrintStmt($expr);
     }
 
@@ -254,7 +255,8 @@ class Parser
         if (!$this->helper->check(TokenType::SEMICOLON)) {
             $expr = $this->exprParser->expression();
         }
-        $this->helper->validate(TokenType::SEMICOLON, "É esperado um ';' no fim de um statement de retorno");
+
+        $this->helper->validateSemicolon($expr ,"É esperado um ';' no fim de um statement de retorno");
 
         return new ReturnStmt($keyword, $expr);
     }

@@ -15,7 +15,7 @@ enum TokenType: string
 
     // two character tokens.
     case BANG_EQUAL = '!='; case EQUAL_EQUAL = '=='; case GREATER_EQUAL = '>='; case LESS_EQUAL = '<=';
-    case PLUS_PLUS = '++'; case MINUS_MINUS = '--';
+    case PLUS_PLUS = '++'; case MINUS_MINUS = '--'; case LAMBDA_RETURN = '=>';
 
     // Literals
     case IDENTIFIER = 'identifier'; case STRING = 'string'; case NUMBER = 'number';

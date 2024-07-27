@@ -10,11 +10,13 @@ use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\ExprHandler;
 use Phortugol\Expr\GroupingExpr;
+use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\LogicalExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\NativeFunctions\PhortugolFunction;
 
 class ExprInterpreter
 {
@@ -169,5 +171,10 @@ class ExprInterpreter
         }
 
         throw new RuntimeError($expr->paren, "Só é possível chamar funções ou classes");
+    }
+
+    protected function handleLambdaExpr(LambdaExpr $expr): mixed
+    {
+        return new PhortugolFunction($expr, $this->interpreter->environment);
     }
 }

@@ -67,7 +67,6 @@ class Scanner
             // One or two char tokens
             '+' => $this->addToken($this->match('+') ? TokenType::PLUS_PLUS: TokenType::PLUS),
             '-' => $this->addToken($this->match('-') ? TokenType::MINUS_MINUS: TokenType::MINUS),
-            '=' => $this->addToken($this->match('=') ? TokenType::EQUAL_EQUAL: TokenType::EQUAL),
             '>' => $this->addToken($this->match('=') ? TokenType::GREATER_EQUAL: TokenType::GREATER),
             '<' => $this->addToken($this->match('=') ? TokenType::LESS_EQUAL: TokenType::LESS),
             '!' => $this->addToken($this->match('=') ? TokenType::BANG_EQUAL: TokenType::BANG),
@@ -79,6 +78,16 @@ class Scanner
             " " => (function(){}), // do nothing
             "\t" => (function(){}), // do nothing
             "\r" => (function(){}), // do nothing
+
+            '=' => (function() {
+                if ($this->match('=')) {
+                    $this->addToken(TokenType::EQUAL_EQUAL);
+                } else if ($this->match('>')) {
+                    $this->addToken(TokenType::LAMBDA_RETURN);
+                } else {
+                    $this->addToken(TokenType::EQUAL);
+                }
+            })(),
 
             // TODO: Add support for multiline comments
             // Maybe it's a comment

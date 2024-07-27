@@ -4,6 +4,7 @@ namespace Phortugol\Parser;
 
 use Phortugol\Enums\TokenType;
 use Phortugol\Expr\CallExpr;
+use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
@@ -13,18 +14,21 @@ use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LogicalExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
+use Phortugol\Stmt\ReturnStmt;
 use Phortugol\Token;
 
 class ExprParser
 {
     private ParserHelper $helper;
+    private Parser $parser;
 
     /**
      * @param Token[] $tokens
      */
-    public function __construct(ParserHelper $helper)
+    public function __construct(ParserHelper $helper, Parser $parser)
     {
         $this->helper = $helper;
+        $this->parser = $parser;
     }
 
     // EXPRESSIONS
@@ -37,7 +41,7 @@ class ExprParser
             }
         }
 
-        return $this->assignment();
+        return $this->lambda();
     }
 
     private function postfixVarIncrementDecrement(): Expr
@@ -54,6 +58,37 @@ class ExprParser
                 new VarExpr($identifier), $operationToken, new LiteralExpr(1)
             )
         );
+    }
+
+    private function lambda(): Expr
+    {
+        // TODO: Maybe send this token to the Expr, so you can use for better error messages
+        if (!$this->helper->match(TokenType::LEFT_PAREN)) {
+            return $this->assignment();
+        }
+
+        $parameters = [];
+        if (!$this->helper->check(TokenType::RIGHT_PAREN)) {
+            do {
+                if (count($parameters) > 255) {
+                    $this->helper->error($this->helper->peek(), "Não é possível ter mais de 255 parâmetros.");
+                }
+
+                array_push($parameters, $this->helper->validate(TokenType::IDENTIFIER, "Experado o nome de um parâmetro."));
+           } while ($this->helper->match(TokenType::COMMA));
+        }
+
+        $this->helper->validate(TokenType::RIGHT_PAREN, "É esperado um ')' depois dos parâmetros.");
+        $token = $this->helper->validate(TokenType::LAMBDA_RETURN, "É esperado o operador '=>' depois dos parâmetros");
+
+        $body = [];
+        if ($this->helper->match(TokenType::LEFT_BRACE)) {
+            $body = $this->parser->blockStatement();
+        } else {
+            array_push($body, new ReturnStmt($token, $this->expression()));
+        }
+
+        return new LambdaExpr($parameters, $body);
     }
 
     private function assignment(): Expr

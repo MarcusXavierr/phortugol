@@ -1,0 +1,7 @@
+função main(a) {
+    escreva a;
+    var a = 20;
+    escreva a;
+}
+
+main(10);

@@ -3,17 +3,19 @@
 namespace Phortugol\NativeFunctions;
 
 use Phortugol\Exceptions\ReturnException;
+use Phortugol\Expr\LambdaExpr;
 use Phortugol\Interpreter\Environment;
 use Phortugol\Interpreter\Interpreter;
 use Phortugol\Interpreter\PhortCallable;
 use Phortugol\Stmt\FunctionStmt;
+use Stringable;
 
-class PhortugolFunction implements PhortCallable
+class PhortugolFunction implements PhortCallable, Stringable
 {
-    private readonly FunctionStmt $declaration;
+    private readonly FunctionStmt|LambdaExpr $declaration;
     private readonly Environment $closure;
 
-    public function __construct(FunctionStmt $declaration, Environment $closure){
+    public function __construct(FunctionStmt|LambdaExpr $declaration, Environment $closure){
         $this->declaration = $declaration;
         $this->closure = $closure;
     }
@@ -39,8 +41,12 @@ class PhortugolFunction implements PhortCallable
         return count($this->declaration->parameters);
     }
 
-    public function toString(): string
+    public function __toString(): string
     {
+        if ($this->declaration instanceof LambdaExpr) {
+            return "<fn lambda>";
+        }
+
         return "<fn " . $this->declaration->name->lexeme . ">" ;
     }
 }

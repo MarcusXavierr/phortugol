@@ -9,6 +9,7 @@ use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\GroupingExpr;
+use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\LogicalExpr;
 use Phortugol\Expr\UnaryExpr;
@@ -36,14 +37,14 @@ class ParserTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        ob_start();
+        // ob_start();
         $this->errorHelper = new ErrorHelper();
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
-        ob_end_clean();
+        // ob_end_clean();
     }
 
     public function test_parse_with_error(): void
@@ -187,6 +188,55 @@ class ParserTest extends TestCase
                     token(")"),
                     [
                         literal(10)
+                    ]
+                )
+            ],
+            "should parse lambda function" => [
+                "tokens" => [
+                    token('('),
+                    token(TokenType::IDENTIFIER, 'param'),
+                    token(')'),
+                    token('=>'),
+                    token(TokenType::IDENTIFIER, 'param'),
+                    token('*'),
+                    token(TokenType::NUMBER, 2),
+                ],
+                "expected" => new LambdaExpr(
+                    [ token(TokenType::IDENTIFIER, 'param') ],
+                    [
+                        new ReturnStmt(
+                            token('=>'),
+                            new BinaryExpr(
+                                new VarExpr(token(TokenType::IDENTIFIER, 'param')),
+                                token(TokenType::STAR),
+                                literal(2)
+                            )
+                        )
+                    ]
+                )
+            ],
+            "should parse lambda functions with block" => [
+                "tokens" => [
+                    token('('),
+                    token(TokenType::IDENTIFIER, 'param'),
+                    token(')'),
+                    token('=>'),
+                    token('{'),
+                    token(TokenType::IDENTIFIER, 'param'),
+                    token('*'),
+                    token(TokenType::NUMBER, 2),
+                    token('}'),
+                ],
+                "expected" => new LambdaExpr(
+                    [ token(TokenType::IDENTIFIER, 'param') ],
+                    [
+                        new ExpressionStmt(
+                            new BinaryExpr(
+                                new VarExpr(token(TokenType::IDENTIFIER, 'param')),
+                                token(TokenType::STAR),
+                                literal(2)
+                            )
+                        )
                     ]
                 )
             ]
@@ -529,6 +579,40 @@ class ParserTest extends TestCase
                     [
                         new ReturnStmt(token('retorne'), literal(1))
                     ]
+                )
+            ],
+            "should parse an var assignment to a lambda function" => [
+                "tokens" => [
+                    token('var'),
+                    token(TokenType::IDENTIFIER, 'a'),
+                    token('='),
+                    token('('),
+                    token(TokenType::IDENTIFIER, 'param'),
+                    token(')'),
+                    token('=>'),
+                    token('{'),
+                    token('retorne'),
+                    token(TokenType::IDENTIFIER, 'param'),
+                    token('*'),
+                    token(TokenType::NUMBER, 2),
+                    token(';'),
+                    token('}')
+                ],
+                "expected" => new VarStmt(
+                    'a',
+                    new LambdaExpr(
+                        [ token(TokenType::IDENTIFIER, 'param') ],
+                        [
+                            new ReturnStmt(
+                                token('retorne'),
+                                new BinaryExpr(
+                                    new VarExpr(token(TokenType::IDENTIFIER, 'param')),
+                                    token(TokenType::STAR),
+                                    literal(2)
+                                )
+                            )
+                        ]
+                    )
                 )
             ],
         ];

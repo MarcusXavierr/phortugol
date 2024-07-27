@@ -2,9 +2,11 @@ função rodaFunção(funçãoCallback, a, b) {
     funçãoCallback(a, b);
 }
 
-função somaNúmeros(a, b) {
-    var resultado = a + b;
-    escreva 'O resultado de ' + a + ' + ' + b + ' é: ' + resultado;
+função somaNúmeros() {
+    retorne (a, b) => {
+        var resultado = a + b;
+        escreva 'O resultado de ' + a + ' + ' + b + ' é: ' + resultado;
+    }
 }
 
-rodaFunção(somaNúmeros, 2, 2);
+rodaFunção(somaNúmeros(), 2, 2);

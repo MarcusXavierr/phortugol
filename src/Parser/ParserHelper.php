@@ -4,6 +4,8 @@ namespace Phortugol\Parser;
 
 use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\ParserError;
+use Phortugol\Expr\Expr;
+use Phortugol\Expr\LambdaExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Token;
 
@@ -109,5 +111,16 @@ class ParserHelper
     public function isAtEnd(): bool
     {
         return $this->peek()->kind === TokenType::EOF;
+    }
+
+    public function validateSemicolon(Expr|null $expr, string $errorMessage): void
+    {
+        if ($expr instanceof LambdaExpr) {
+            // INFO: just consume the semicolon as it is not needed
+            $this->match(TokenType::SEMICOLON);
+            return;
+        }
+
+        $this->validate(TokenType::SEMICOLON, $errorMessage);
     }
 }
