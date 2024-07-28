@@ -6,11 +6,12 @@ use Phortugol\Interpreter\Interpreter;
 use Phortugol\Interpreter\PhortCallable;
 use Stringable;
 
-class Clock implements PhortCallable, Stringable
+class Read implements PhortCallable, Stringable
 {
     public function call(Interpreter $interpreter, array $arguments): mixed
     {
-        return time();
+        $input = readline();
+        return $input;
     }
 
     public function arity(): int
@@ -20,6 +21,7 @@ class Clock implements PhortCallable, Stringable
 
     public function __toString(): string
     {
-        return "<fn relógio>";
+        return '<fn leia>';
     }
+
 }

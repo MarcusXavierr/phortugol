@@ -10,6 +10,8 @@ use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\NativeFunctions\Clock;
 use Phortugol\NativeFunctions\PhortugolFunction;
+use Phortugol\NativeFunctions\Pow;
+use Phortugol\NativeFunctions\Read;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\FunctionStmt;
@@ -179,5 +181,8 @@ class Interpreter
     {
         $this->globals->define("relógio", new Clock());
         $this->globals->define("relogio", new Clock());
+        $this->globals->define("potência", new Pow());
+        $this->globals->define("potencia", new Pow());
+        $this->globals->define("leia", new Read());
     }
 }
