@@ -8,10 +8,14 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
     require __DIR__ . '/vendor/autoload.php';
 }
 
+use Phortugol\Expr\Expr;
+use Phortugol\Expr\LiteralExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Interpreter\Interpreter;
 use Phortugol\Parser\Parser;
 use Phortugol\Scanner\Scanner;
+use Phortugol\Stmt\ExpressionStmt;
+use Phortugol\Stmt\PrintStmt;
 
 class Main {
     private ErrorHelper $error;
@@ -44,7 +48,7 @@ class Main {
         while (true) {
             $line = readline("> ");
             if ($line == null) break;
-            $this->run($line);
+            $this->run($line, true);
             $this->error->hadError = false;
         }
     }
@@ -63,18 +67,22 @@ class Main {
         }
     }
 
-    private function run(string $source): void
+    private function run(string $source, bool $isRepl = false): void
     {
         $scanner = new Scanner($source, $this->error);
         $tokens = $scanner->scanTokens();
         $parser = new Parser($this->error, $tokens);
-        $expr = $parser->parse();
+        $statements = $parser->parse();
 
         if ($this->error->hadError) {
             return;
         }
 
-        $this->interpreter->interpret($expr);
+        if ($isRepl && count($statements) == 1 && $statements[0] instanceof ExpressionStmt) {
+            $statements = [new PrintStmt($statements[0]->expression)];
+        }
+
+        $this->interpreter->interpret($statements);
     }
 }
 
