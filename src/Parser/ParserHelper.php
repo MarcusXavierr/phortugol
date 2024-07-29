@@ -123,4 +123,22 @@ class ParserHelper
 
         $this->validate(TokenType::SEMICOLON, $errorMessage);
     }
+
+    // TODO: Refactor this later
+    /**
+     * Find the right paranthesis then check if it is followed by a lambda return
+    */
+    public function isLambda(): bool
+    {
+        $length = count($this->tokens);
+        for ($i = $this->current; $i < $length; $i++) {
+            if ($this->tokens[$i]->kind == TokenType::RIGHT_PAREN) {
+                if (($i + 1) < $length && $this->tokens[$i + 1]->kind == TokenType::LAMBDA_RETURN) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

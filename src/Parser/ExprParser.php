@@ -63,9 +63,11 @@ class ExprParser
     private function lambda(): Expr
     {
         // TODO: Maybe send this token to the Expr, so you can use for better error messages
-        if (!$this->helper->match(TokenType::LEFT_PAREN)) {
+        if (!$this->helper->check(TokenType::LEFT_PAREN) || !$this->helper->isLambda()) {
             return $this->assignment();
         }
+
+        $this->helper->validate(TokenType::LEFT_PAREN, "É esperado um '(' no início de uma função lambda.");
 
         $parameters = [];
         if (!$this->helper->check(TokenType::RIGHT_PAREN)) {

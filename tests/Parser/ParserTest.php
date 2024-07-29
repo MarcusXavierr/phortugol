@@ -239,6 +239,22 @@ class ParserTest extends TestCase
                         )
                     ]
                 )
+            ],
+            "should parse expressions with grouping" => [
+                "tokens" => [
+                    token('('),
+                    token(TokenType::NUMBER, 1),
+                    token('+'),
+                    token(TokenType::NUMBER, 2),
+                    token(')'),
+                ],
+                "expected" => new GroupingExpr(
+                    new BinaryExpr(
+                        literal(1),
+                        token(TokenType::PLUS),
+                        literal(2)
+                    )
+                )
             ]
         ];
     }
