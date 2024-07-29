@@ -136,6 +136,8 @@ class ParserHelper
                 if (($i + 1) < $length && $this->tokens[$i + 1]->kind == TokenType::LAMBDA_RETURN) {
                     return true;
                 }
+
+                return false;
             }
         }
 
