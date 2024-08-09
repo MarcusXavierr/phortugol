@@ -1,0 +1,3 @@
+escreva "Escreva seu nome: ";
+var nome = leia();
+escreva "Olá, " + nome + "!";

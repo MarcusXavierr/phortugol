@@ -1,0 +1,21 @@
+função tailfib(n, num1, num2) {
+    escreva num1;
+
+    se (n == 0) {
+        retorne num1;
+    }
+
+    se (n <= 1) {
+        retorne num2;
+    }
+
+    var fib = tailfib(n - 1, num2, num1 + num2);
+
+    retorne fib;
+}
+
+escreva "Quantos números da sequencia de fibonacci deseja printar? ";
+var n = leia();
+escreva nulo;
+
+escreva tailfib(n, 0 , 1);
