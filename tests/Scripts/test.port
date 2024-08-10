@@ -1,0 +1,6 @@
+{
+    var a = 1;
+    se (a == 1) {
+        escreva a;
+    } senão escreva a + 1;
+}
