@@ -17,6 +17,7 @@ use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\NativeFunctions\PhortugolFunction;
+use Phortugol\Token;
 
 class ExprInterpreter
 {
@@ -131,13 +132,20 @@ class ExprInterpreter
 
     protected function handleVarExpr(VarExpr $expr): mixed
     {
-        return $this->environment->get($expr->name);
+        return $this->lookupVariable($expr->name, $expr);
     }
 
     protected function handleAssignExpr(AssignExpr $expr): mixed
     {
         $value = $this->evaluate($expr->assignment);
-        $this->environment->assign($expr->identifier, $value);
+        $distance = $this->interpreter->locals->get($expr, null);
+
+        if ($distance !== null) {
+            $this->environment->assignAt($distance, $expr->identifier, $value);
+        } else {
+            $this->interpreter->globals->assign($expr->identifier, $value);
+        }
+
         return $value;
     }
 
@@ -176,5 +184,15 @@ class ExprInterpreter
     protected function handleLambdaExpr(LambdaExpr $expr): mixed
     {
         return new PhortugolFunction($expr, $this->interpreter->environment);
+    }
+
+    private function lookupVariable(Token $name, VarExpr $expr): mixed
+    {
+        $distance = $this->interpreter->locals->get($expr, null);
+        if ($distance !== null) {
+            return $this->environment->getAt($distance, $name->lexeme);
+        } else {
+            return $this->interpreter->globals->get($name);
+        }
     }
 }

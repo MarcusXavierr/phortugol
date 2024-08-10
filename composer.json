@@ -19,5 +19,8 @@
     },
   "scripts": {
     "test": "phpunit --testdox"
-  }
+  },
+    "require": {
+        "php-ds/php-ds": "^1.5"
+    }
 }

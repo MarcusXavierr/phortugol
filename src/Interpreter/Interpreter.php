@@ -2,6 +2,7 @@
 
 namespace Phortugol\Interpreter;
 
+use Ds\Map;
 use Phortugol\Exceptions\BreakException;
 use Phortugol\Exceptions\ContinueException;
 use Phortugol\Exceptions\ReturnException;
@@ -23,8 +24,6 @@ use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
 
-// TODO: implementar ++ e -- para variáveis
-// TODO: Implementar NULLs
 class Interpreter
 {
     /** @use StmtHandler<void> */
@@ -34,6 +33,7 @@ class Interpreter
     private readonly TypeValidator $typeValidator;
     private readonly ExprInterpreter $exprInterpreter;
     public readonly Environment $globals;
+    public Map $locals;
     public Environment $environment;
 
     public function __construct(ErrorHelper $errorHelper)
@@ -43,6 +43,7 @@ class Interpreter
         $this->globals = new Environment(null);
         $this->environment = $this->globals;
         $this->exprInterpreter = new ExprInterpreter($this->errorHelper, $this->environment, $this);
+        $this->locals = new Map();
         $this->mountNativeFunctions();
     }
 
@@ -63,6 +64,11 @@ class Interpreter
     private function evaluate(Expr $expression): mixed
     {
         return $this->exprInterpreter->evaluate($expression);
+    }
+
+    public function resolve(Expr $expr, int $depth): void
+    {
+        $this->locals->put($expr, $depth);
     }
 
     // Statements

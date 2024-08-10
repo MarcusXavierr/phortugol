@@ -1,0 +1,11 @@
+var a = "global";
+
+{
+    função printA() {
+        escreva a;
+    }
+
+    printA();
+    var a = 'local';
+    printA();
+}

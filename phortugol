@@ -11,6 +11,7 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Interpreter\Interpreter;
 use Phortugol\Parser\Parser;
+use Phortugol\Resolver\Resolver;
 use Phortugol\Scanner\Scanner;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\PrintStmt;
@@ -78,6 +79,13 @@ class Main {
 
         if ($isRepl && count($statements) == 1 && $statements[0] instanceof ExpressionStmt) {
             $statements = [new PrintStmt($statements[0]->expression)];
+        }
+
+        $resolver = new Resolver($this->interpreter, $this->error);
+        $resolver->resolve($statements);
+
+        if ($this->error->hadError) {
+            return;
         }
 
         $this->interpreter->interpret($statements);

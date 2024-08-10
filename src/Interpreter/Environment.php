@@ -7,8 +7,8 @@ use Phortugol\Token;
 
 class Environment
 {
-    private array $state = [];
-    private readonly ?Environment $enclosing;
+    public array $state = [];
+    public readonly ?Environment $enclosing;
 
     public function __construct(?Environment $enclosing) {
         $this->enclosing = $enclosing;
@@ -45,5 +45,25 @@ class Environment
         }
 
         throw new RuntimeError($name, "Variável não definida {$name->lexeme}");
+    }
+
+    public function getAt(int $distance, string $string): mixed
+    {
+        return $this->ancestor($distance)->state[$string];
+    }
+
+    public function assignAt(int $distance, Token $name, mixed $value): void
+    {
+        $this->ancestor($distance)->assign($name, $value);
+    }
+
+    private function ancestor(int $depth): Environment
+    {
+        $environment = $this;
+        for ($i = 0; $i < $depth; $i++) {
+            $environment = $environment->enclosing;
+        }
+
+        return $environment;
     }
 }

@@ -37,7 +37,7 @@ class Parser
     }
 
     /**
-     * @return Stmt|null[]|null
+     * @return Stmt[]|null[]|null
      */
     public function parse(): array|null
     {
