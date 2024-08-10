@@ -49,7 +49,7 @@ class Environment
 
     public function getAt(int $distance, string $string): mixed
     {
-        return $this->ancestor($distance)->state[$string];
+        return $this->ancestor($distance)->state[$string] ?? null;
     }
 
     public function assignAt(int $distance, Token $name, mixed $value): void

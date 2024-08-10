@@ -37,14 +37,14 @@ class ParserTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        // ob_start();
+        ob_start();
         $this->errorHelper = new ErrorHelper();
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
-        // ob_end_clean();
+        ob_end_clean();
     }
 
     public function test_parse_with_error(): void

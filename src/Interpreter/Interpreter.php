@@ -61,7 +61,7 @@ class Interpreter
         }
     }
 
-    private function evaluate(Expr $expression): mixed
+    public function evaluate(Expr $expression): mixed
     {
         return $this->exprInterpreter->evaluate($expression);
     }
