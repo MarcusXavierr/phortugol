@@ -79,7 +79,7 @@ class ExprParser
                 }
 
                 array_push($parameters, $this->helper->validate(TokenType::IDENTIFIER, "Experado o nome de um parâmetro."));
-           } while ($this->helper->match(TokenType::COMMA));
+            } while ($this->helper->match(TokenType::COMMA));
         }
 
         $this->helper->validate(TokenType::RIGHT_PAREN, "É esperado um ')' depois dos parâmetros.");
@@ -159,36 +159,14 @@ class ExprParser
 
     private function equality(): Expr
     {
-        $expr = $this->arrayDef();
+        $expr = $this->comparison();
         while ($this->helper->match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
             $operator = $this->helper->previous();
-            $right = $this->arrayDef();
+            $right = $this->comparison();
             $expr = new BinaryExpr($expr, $operator, $right);
         }
 
         return $expr;
-    }
-
-    private function arrayDef(): Expr
-    {
-        if (!$this->helper->check(TokenType::LEFT_BRACKET)) {
-            return $this->comparison();
-        }
-
-        if ($this->helper->previous()->kind == TokenType::RIGHT_BRACKET) {
-            return $this->arrayGet();
-        }
-
-        $leftBracket = $this->helper->validate(TokenType::LEFT_BRACKET, "Esperado um '[' antes do início da lista.");
-        $elements = [];
-        if (!$this->helper->check(TokenType::RIGHT_BRACKET)) {
-            do {
-                array_push($elements, $this->expression());
-            } while($this->helper->match(TokenType::COMMA));
-        }
-
-        $this->helper->validate(TokenType::RIGHT_BRACKET, "Esperado ']' após a criação de um array.");
-        return new ArrayDefExpr($leftBracket, $elements);
     }
 
     private function comparison(): Expr
@@ -271,10 +249,10 @@ class ExprParser
         return new CallExpr($callee, $paren, $arguments);
     }
 
-    // TODO: Add support for multiple array calls. like: array[0][1][10]
+    // TODO: solve the problem of getting value from an array returned from a function call `var a = (x) => [x,x,x]; a(10)[0];` breaks
     private function arrayGet(): Expr
     {
-        $expr = $this->primary();
+        $expr = $this->arrayDef();
         while (true) {
             if ($this->helper->match(TokenType::LEFT_BRACKET)) {
                 $expr = $this->finishArray($expr);
@@ -295,6 +273,28 @@ class ExprParser
         $index = $this->expression();
         $bracket = $this->helper->validate(TokenType::RIGHT_BRACKET, "É esperado um ']' no fim de uma leitura na lista");
         return new ArrayGetExpr($bracket, $array, $index);
+    }
+
+    private function arrayDef(): Expr
+    {
+        if (!$this->helper->check(TokenType::LEFT_BRACKET)) {
+            return $this->primary();
+        }
+
+        if ($this->helper->previous()->kind == TokenType::RIGHT_BRACKET) {
+            return $this->primary();
+        }
+
+        $leftBracket = $this->helper->validate(TokenType::LEFT_BRACKET, "Esperado um '[' antes do início da lista.");
+        $elements = [];
+        if (!$this->helper->check(TokenType::RIGHT_BRACKET)) {
+            do {
+                array_push($elements, $this->expression());
+            } while($this->helper->match(TokenType::COMMA));
+        }
+
+        $this->helper->validate(TokenType::RIGHT_BRACKET, "Esperado ']' após a criação de um array.");
+        return new ArrayDefExpr($leftBracket, $elements);
     }
 
     private function primary(): Expr
