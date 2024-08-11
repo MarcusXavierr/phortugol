@@ -54,6 +54,8 @@ class Scanner
             // Single char token
             '(' => $this->addToken(TokenType::LEFT_PAREN),
             ')' => $this->addToken(TokenType::RIGHT_PAREN),
+            '[' => $this->addToken(TokenType::LEFT_BRACKET),
+            ']' => $this->addToken(TokenType::RIGHT_BRACKET),
             '{' => $this->addToken(TokenType::LEFT_BRACE),
             '}' => $this->addToken(TokenType::RIGHT_BRACE),
             '*' => $this->addToken(TokenType::STAR),

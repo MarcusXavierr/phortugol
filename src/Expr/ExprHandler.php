@@ -26,6 +26,8 @@ trait ExprHandler
             $expr instanceof CallExpr => $this->handleCallExpr($expr),
             // HACK: maybe I can return a FunctionStmt or PhortugolFunction only because the return type is mixed, and hey, it's PHP
             $expr instanceof LambdaExpr => $this->handleLambdaExpr($expr),
+            $expr instanceof ArrayDefExpr => $this->handleArrayDefExpr($expr),
+            $expr instanceof ArrayGetExpr => $this->handleArrayGetExpr($expr),
             default => throw new Exception("Incomplete expression implementation")
         };
     }
@@ -79,4 +81,14 @@ trait ExprHandler
      * @return T
      */
     protected abstract function handleLambdaExpr(LambdaExpr $expr);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleArrayDefExpr(ArrayDefExpr $expr);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleArrayGetExpr(ArrayGetExpr $expr);
 }

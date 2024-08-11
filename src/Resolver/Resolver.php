@@ -4,6 +4,8 @@ namespace Phortugol\Resolver;
 
 use Ds\Map;
 use Ds\Stack;
+use Phortugol\Expr\ArrayDefExpr;
+use Phortugol\Expr\ArrayGetExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\ExprHandler;
@@ -270,8 +272,32 @@ class Resolver
 
     protected function handleLambdaExpr(LambdaExpr $expr): void
     {
+        $currentFunction = $this->currentFunction;
+        $this->currentFunction = FunctionType::FUNCTION;
+
         $this->beginScope();
+
+        foreach ($expr->parameters as $param) {
+            $this->declare($param->lexeme);
+            $this->define($param->lexeme);
+        }
         $this->resolve($expr->body);
+
         $this->endScope();
+
+        $this->currentFunction = $currentFunction;
+    }
+
+    protected function handleArrayDefExpr(ArrayDefExpr $expr): void
+    {
+        foreach ($expr->elements as $element) {
+            $this->resolveExpr($element);
+        }
+    }
+
+    protected function handleArrayGetExpr(ArrayGetExpr $expr): void
+    {
+        $this->resolveExpr($expr->array);
+        $this->resolveExpr($expr->index);
     }
 }

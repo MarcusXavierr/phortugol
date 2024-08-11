@@ -6,6 +6,7 @@ enum TokenType: string
 {
     // Single character tokens.
     case LEFT_PAREN = '('; case RIGHT_PAREN = ')'; case LEFT_BRACE = '{'; case RIGHT_BRACE = '}';
+    case LEFT_BRACKET = '['; case RIGHT_BRACKET = ']';
     case COMMA = ','; case DOT = '.'; case SEMICOLON = ';';
 
     case SLASH = '/'; case STAR = '*'; case MINUS = '-'; case PLUS = '+';

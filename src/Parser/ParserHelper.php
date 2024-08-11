@@ -13,8 +13,8 @@ class ParserHelper
 {
     private ErrorHelper $errorHelper;
     /** @var Token[] $tokens */
-    private array $tokens;
-    private int $current;
+    public array $tokens;
+    public int $current;
 
     /**
      * @param Token[] $tokens
@@ -96,7 +96,7 @@ class ParserHelper
 
     public function previous(): Token
     {
-        return $this->tokens[$this->current - 1];
+        return $this->tokens[max($this->current - 1, 0)];
     }
 
     public function peekNext(): Token

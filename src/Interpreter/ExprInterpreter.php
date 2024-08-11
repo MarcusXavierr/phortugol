@@ -2,8 +2,11 @@
 
 namespace Phortugol\Interpreter;
 
+use Ds\Map;
 use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\RuntimeError;
+use Phortugol\Expr\ArrayDefExpr;
+use Phortugol\Expr\ArrayGetExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\CallExpr;
@@ -184,6 +187,33 @@ class ExprInterpreter
     protected function handleLambdaExpr(LambdaExpr $expr): mixed
     {
         return new PhortugolFunction($expr, $this->interpreter->environment);
+    }
+
+    protected function handleArrayDefExpr(ArrayDefExpr $expr): mixed
+    {
+        $elements = new Map();
+        foreach ($expr->elements as $key => $element) {
+            $elements->put($key, $this->evaluate($element));
+        }
+
+        return $elements;
+    }
+
+    protected function handleArrayGetExpr(ArrayGetExpr $expr): mixed
+    {
+        $array = $this->evaluate($expr->array);
+        $index = $this->evaluate($expr->index);
+
+        if (!($array instanceof Map)) {
+            throw new RuntimeError($expr->name, "Variável não é um array");
+        }
+
+        // TODO: fazer funcionar sem o cast, pois vou lidar com outros tipos de indices quando implementar maps
+        if (!$array->hasKey((int)$index)) {
+            throw new RuntimeError($expr->name, "Acessando um índice inexistente no array");
+        }
+
+        return $array[(int)$index];
     }
 
     private function lookupVariable(Token $name, VarExpr $expr): mixed

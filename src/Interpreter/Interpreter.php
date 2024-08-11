@@ -9,6 +9,8 @@ use Phortugol\Exceptions\ReturnException;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\NativeFunctions\ArraySize;
+use Phortugol\NativeFunctions\ArrayPush;
 use Phortugol\NativeFunctions\Clock;
 use Phortugol\NativeFunctions\PhortugolFunction;
 use Phortugol\NativeFunctions\Pow;
@@ -80,11 +82,14 @@ class Interpreter
             echo "verdadeiro";
         } else if ($result === false) {
             echo "falso";
+        } else if ($result instanceof Map) {
+            printArray($result);
         }
         else {
             echo $result;
         }
 
+        // TODO: Conseguir remover isso e fazer o "\n" ser interpretado como fim de linha
         echo PHP_EOL;
     }
 
@@ -190,5 +195,19 @@ class Interpreter
         $this->globals->define("potência", new Pow());
         $this->globals->define("potencia", new Pow());
         $this->globals->define("leia", new Read());
+        $this->globals->define("tamanho", new ArraySize());
+        $this->globals->define("inserir", new ArrayPush());
     }
+}
+
+function printArray(Map $arr): void
+{
+    echo "[";
+    for ($i = 0; $i < $arr->count(); $i++) {
+        if ($i > 0) {
+            echo ", ";
+        }
+        echo $arr[$i];
+    }
+    echo "]";
 }
