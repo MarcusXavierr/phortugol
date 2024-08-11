@@ -20,19 +20,19 @@ ou simplesmente execute o interpretador sem nenhum argumento para entrar no modo
 ./phortugol
 ```
 
-Para rodar os testes (boa parte do parser e scanner estão cobertos com testes) basta rodar 
+Para rodar os testes (boa parte do parser e scanner estão cobertos com testes) basta rodar
 ```
 composer test
 ```
 
 ## Roadmap
-- [x] Adicionar escopo nos blocos da linguagem 
+- [x] Adicionar escopo nos blocos da linguagem
 - [x] Implementar suporte a loops e condicionais
 - [x] Implementar funções
 - [x] Criar um mecanismo para cadastrar funções nativas na linguagem
 - [x] Suportar closures
-- [ ] Melhorar o escopo estático
-- [ ] Implementar suporte a arrays
+- [x] Melhorar o escopo estático
+- [x] Implementar suporte a arrays
 - [ ] Implementar classes
 - [ ] Criar uma página para documentar a sintaxe da linguagem
 - [ ] Publicar a extensão para VS Code que adiciona syntax highlight em arquivos `.port`
@@ -59,7 +59,7 @@ parameters -> IDENTIFIER ( "," IDENTIFIER)*;
 
 varDecl -> "var" IDENTIFIER ("=" expression)? ";"
 
-statement ->  exprStmt 
+statement ->  exprStmt
 			| printStmt
 			| block
 			| ifStmt
@@ -72,14 +72,20 @@ printStmt -> "escreva" expression ";" ;
 block -> "{" declaration* "}";
 ifStmt -> "se" "(" expression ")" statement ("senao" statement)? ;
 whileStmt -> "enquanto" "(" expression ")" statement;
-forStmt -> "repetir" "(" 
+forStmt -> "repetir" "("
 			(varDecl | exprStmt)? ";"
 			expression? ";"
 			expression? ")" statement;
 returnStmt -> "retorne" expression? ";" ;
 
 // Expressions
-expression     → conditional ;
+expression     → lambda ;
+lambda        -> "(" parameters? ")" "=>" (block | expression)
+                 | assignment;
+
+assignment -> IDENTIFIER "=" assignment
+			 | conditional;
+
 conditional   -> logic_or ("?" expression ":" conditional)?;
 logic_or       → logic_and ( "OU" logic_and )* ;
 logic_and      → equality ( "E" equality )* ;
@@ -89,7 +95,10 @@ term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" | "%" ) unary )* ;
 unary          → ( "!" | "-" ) unary
                | call ;
-call           -> primary ( "(" arguments? ")" )*;
+call           -> arrayGet ( "(" arguments? ")" )*;
+arrayGet       -> arrayDef ( "[" (expression) "]" )*
+arrayDef      -> "[" (expression)? ("," expression)* "]";
+               | primary;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" ;
 arguments      -> expression ("," expression)*;
