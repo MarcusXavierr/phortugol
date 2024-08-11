@@ -1,0 +1,16 @@
+var lista = [];
+repita (var i = 0; i < 4; i++) {
+    escreva "Escreva seu nome: ";
+    var nome = leia();
+    inserir(lista, nome);
+    escreva "\n";
+}
+
+escreva "Olá, ";
+repita (var i = 0; i < tamanho(lista); i++) {
+    se (i > 0) {
+        escreva ", ";
+    }
+
+    escreva lista[i];
+}
