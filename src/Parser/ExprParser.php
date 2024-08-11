@@ -302,6 +302,7 @@ class ExprParser
         if ($this->helper->match(TokenType::FALSE)) return new LiteralExpr(false);
         if ($this->helper->match(TokenType::TRUE)) return new LiteralExpr(true);
         if ($this->helper->match(TokenType::NULL)) return new LiteralExpr(null);
+        if ($this->helper->match(TokenType::NL)) return new LiteralExpr("\n");
 
         if ($this->helper->match(TokenType::NUMBER, TokenType::STRING)) {
             return new LiteralExpr($this->helper->previous()->literal);

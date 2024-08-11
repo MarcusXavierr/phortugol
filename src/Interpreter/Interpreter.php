@@ -85,12 +85,12 @@ class Interpreter
         } else if ($result instanceof Map) {
             printArray($result);
         }
-        else {
+        else if (gettype($result) === "string") {
+            $result = str_replace('\n', "\n", $result);
+            echo $result;
+        } else {
             echo $result;
         }
-
-        // TODO: Conseguir remover isso e fazer o "\n" ser interpretado como fim de linha
-        echo PHP_EOL;
     }
 
     protected function handleExpression(ExpressionStmt $stmt): void

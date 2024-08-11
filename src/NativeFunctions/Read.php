@@ -10,7 +10,8 @@ class Read implements PhortCallable, Stringable
 {
     public function call(Interpreter $interpreter, array $arguments): mixed
     {
-        $input = readline();
+        $input = "";
+        fscanf(STDIN, "%s", $input);
         return $input;
     }
 

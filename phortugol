@@ -8,6 +8,7 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
     require __DIR__ . '/vendor/autoload.php';
 }
 
+use Phortugol\Expr\LiteralExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Interpreter\Interpreter;
 use Phortugol\Parser\Parser;
@@ -80,7 +81,7 @@ class Main {
         if ($isRepl && count($statements) >= 1) {
             $lastStatement = $statements[count($statements) - 1];
             if ($lastStatement instanceof ExpressionStmt) {
-                array_push($statements, new PrintStmt($lastStatement->expression));
+                array_push($statements, new PrintStmt($lastStatement->expression), new PrintStmt(new LiteralExpr("\n")));
             }
         }
 

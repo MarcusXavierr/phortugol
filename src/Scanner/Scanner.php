@@ -75,6 +75,7 @@ class Scanner
 
             '&' => $this->addToken($this->match('&') ? TokenType::AND: TokenType::IDENTIFIER),
             '|' => $this->addToken($this->match('|') ? TokenType::OR: TokenType::IDENTIFIER),
+            'N' => $this->addToken($this->match('L') ? TokenType::NL: TokenType::IDENTIFIER),
 
             //special cases
             " " => (function(){}), // do nothing

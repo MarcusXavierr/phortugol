@@ -99,7 +99,7 @@ call           -> arrayGet ( "(" arguments? ")" )*;
 arrayGet       -> arrayDef ( "[" (expression) "]" )*
 arrayDef      -> "[" (expression)? ("," expression)* "]";
                | primary;
-primary        → NUMBER | STRING | "true" | "false" | "nil"
+primary        → NUMBER | STRING | "verdadeiro" | "falso" | "nulo" | "NL"
                | "(" expression ")" ;
 arguments      -> expression ("," expression)*;
 ```

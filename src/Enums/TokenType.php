@@ -30,5 +30,5 @@ enum TokenType: string
     case NULL = 'nulo'; case UNDEFINED = 'indefinido';
 
     case PRINT = 'escreva'; case READ = 'leia';
-    case EOF = '\0';
+    case EOF = '\0'; case NL = 'NL'; // Nova Linha
 }
