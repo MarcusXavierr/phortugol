@@ -193,7 +193,12 @@ class ExprInterpreter
     {
         $elements = new Map();
         foreach ($expr->elements as $key => $element) {
-            $elements->put($key, $this->evaluate($element));
+            if (!is_scalar($key)) {
+                // INFO: Todas as chaves de arrays são convertidas para strings
+                throw new RuntimeError($expr->leftBracket, "Índices de arrays só podem ser números ou strings");
+            }
+
+            $elements->put((string)$key, $this->evaluate($element));
         }
 
         return $elements;
@@ -205,15 +210,18 @@ class ExprInterpreter
         $index = $this->evaluate($expr->index);
 
         if (!($array instanceof Map)) {
-            throw new RuntimeError($expr->name, "Variável não é um array");
+            throw new RuntimeError($expr->bracket, "Variável não é um array");
         }
 
-        // TODO: fazer funcionar sem o cast, pois vou lidar com outros tipos de indices quando implementar maps
-        if (!$array->hasKey((int)$index)) {
-            throw new RuntimeError($expr->name, "Acessando um índice inexistente no array");
+        if (!is_scalar($index)) {
+            throw new RuntimeError($expr->bracket, "Índices de arrays só podem ser números ou strings");
         }
 
-        return $array[(int)$index];
+        if ($array->hasKey((string)$index)) {
+            return $array[(string)$index];
+        }
+
+        throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no array");
     }
 
     private function lookupVariable(Token $name, VarExpr $expr): mixed
