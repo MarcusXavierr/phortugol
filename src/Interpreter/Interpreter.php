@@ -9,9 +9,11 @@ use Phortugol\Exceptions\ReturnException;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\Expr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\NativeFunctions\ArrayInsert;
 use Phortugol\NativeFunctions\ArraySize;
 use Phortugol\NativeFunctions\ArrayPush;
 use Phortugol\NativeFunctions\Clock;
+use Phortugol\NativeFunctions\KeyExists;
 use Phortugol\NativeFunctions\PhortugolFunction;
 use Phortugol\NativeFunctions\Pow;
 use Phortugol\NativeFunctions\Read;
@@ -196,18 +198,48 @@ class Interpreter
         $this->globals->define("potencia", new Pow());
         $this->globals->define("leia", new Read());
         $this->globals->define("tamanho", new ArraySize());
-        $this->globals->define("inserir", new ArrayPush());
+        $this->globals->define("empilhar", new ArrayPush());
+        $this->globals->define("inserir", new ArrayInsert());
+        $this->globals->define("temChave", new KeyExists());
     }
 }
 
+// TODO: Refactor later
 function printArray(Map $arr): void
 {
-    echo "[";
-    for ($i = 0; $i < $arr->count(); $i++) {
-        if ($i > 0) {
-            echo ", ";
+    $isAssoc = false;
+    $i = 0;
+    foreach ($arr as $key => $value) {
+        if ($key != $i) {
+            $isAssoc = true;
+            break;
         }
-        echo $arr[$i];
+        $i++;
     }
+
+    echo "[";
+
+    if ($isAssoc) {
+        $count = 0;
+        foreach ($arr as $key => $value) {
+            $text = "";
+            if ($count > 0) {
+                $text .= ", ";
+            }
+
+            $count++;
+            echo $text . $key . " => " . $value;
+        }
+    } else {
+        $count = 0;
+        foreach ($arr as $value) {
+            if ($count > 0) {
+                echo ", ";
+            }
+            $count++;
+            echo $value;
+        }
+    }
+
     echo "]";
 }

@@ -1,0 +1,32 @@
+função memoize(func) {
+    var cache = [];
+
+    retorne (arg) => {
+        se (!temChave(cache, arg)) {
+            inserir(cache, arg, func(arg));
+        }
+
+        retorne cache[arg];
+    };
+}
+
+função fibonacci(n) {
+  se (n <= 0) retorne 0;
+  se (n <= 1) retorne 1;
+
+  retorne fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+fibonacci = memoize(fibonacci);
+
+var now = relogio();
+
+repita (var i = 1; i < 70; i++) {
+//    escreva fibonacci(i) + NL;
+    //escreva memoizedComputation(i) + NL;
+}
+
+escreva "fibonacci(65) = " + fibonacci(65) + NL;
+
+
+//escreva "se passaram " + (relogio() - now) + " segundos" + NL;
