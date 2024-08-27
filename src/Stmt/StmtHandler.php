@@ -26,6 +26,7 @@ trait StmtHandler
             $stmt instanceof ContinueStmt => $this->handleContinue(),
             $stmt instanceof FunctionStmt => $this->handleFunctionStmt($stmt),
             $stmt instanceof ReturnStmt => $this->handleReturnStmt($stmt),
+            $stmt instanceof ClassDecl => $this->handleClassDecl($stmt),
             default => throw new Exception("Incomplete statement implementation")
         };
     }
@@ -79,4 +80,9 @@ trait StmtHandler
      * @return T
      */
     protected abstract function handleReturnStmt(ReturnStmt $stmt);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleClassDecl(ClassDecl $stmt);
 }

@@ -26,9 +26,10 @@ enum TokenType: string
     case AND = '&&'; case OR = '||'; case FOR = 'repita'; case WHILE = 'enquanto';
     case BREAK = 'pare'; case CONTINUE = 'continue';
     case VAR = 'var';
-    case FUNCTION = 'funcao'; case RETURN = 'retorne';
-    case NULL = 'nulo'; case UNDEFINED = 'indefinido';
+    case FUNCTION = 'funcao'; case RETURN = 'retorne'; case PCLASS = 'classe';
+    case NULL = 'nulo'; case UNDEFINED = 'indefinido'; case THIS = 'meu';
 
     case PRINT = 'escreva'; case READ = 'leia';
     case EOF = '\0'; case NL = 'NL'; // Nova Linha
+    case CONSTRUCTOR = 'init';
 }

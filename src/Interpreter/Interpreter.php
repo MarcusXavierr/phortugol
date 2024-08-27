@@ -3,6 +3,7 @@
 namespace Phortugol\Interpreter;
 
 use Ds\Map;
+use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\BreakException;
 use Phortugol\Exceptions\ContinueException;
 use Phortugol\Exceptions\ReturnException;
@@ -14,10 +15,12 @@ use Phortugol\NativeFunctions\ArraySize;
 use Phortugol\NativeFunctions\ArrayPush;
 use Phortugol\NativeFunctions\Clock;
 use Phortugol\NativeFunctions\KeyExists;
+use Phortugol\NativeFunctions\PhortClass;
 use Phortugol\NativeFunctions\PhortugolFunction;
 use Phortugol\NativeFunctions\Pow;
 use Phortugol\NativeFunctions\Read;
 use Phortugol\Stmt\BlockStmt;
+use Phortugol\Stmt\ClassDecl;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\FunctionStmt;
 use Phortugol\Stmt\IfStmt;
@@ -169,6 +172,27 @@ class Interpreter
         throw new ReturnException($value);
     }
 
+    protected function handleClassDecl(ClassDecl $stmt): void
+    {
+        $this->environment->define($stmt->name->lexeme, null);
+
+        $methods = new Map();
+        // TODO: Quando eu conseguir parsear atributos fora de métodos, nós vamos mudar um pouco essa lógica. Talvez adicionar uma validação de tipo
+        foreach ($stmt->body as $method) {
+            if ($method instanceof FunctionStmt) {
+                $isInit = $method->name->lexeme == TokenType::CONSTRUCTOR->value;
+
+                $function = new PhortugolFunction($method, $this->environment, $isInit);
+                $methods->put($method->name->lexeme, $function);
+            }
+
+            throw new RuntimeError($stmt->name, "Encontrado problema na classe, têm uma estrutura que não é um método dentro dela");
+        }
+
+        $phortClass = new PhortClass($stmt->name->lexeme, $methods);
+        $this->environment->assign($stmt->name, $phortClass);
+    }
+
     /**
      * @param Stmt[] $statements
      */
@@ -187,7 +211,6 @@ class Interpreter
             $this->environment = $previous;
             $this->exprInterpreter->setEnvironment($previous);
         }
-
     }
 
     private function mountNativeFunctions(): void

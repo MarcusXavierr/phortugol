@@ -11,14 +11,19 @@ use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\ConditionalExpr;
+use Phortugol\Expr\Expr;
 use Phortugol\Expr\ExprHandler;
+use Phortugol\Expr\GetExpr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\LogicalExpr;
+use Phortugol\Expr\SetExpr;
+use Phortugol\Expr\ThisExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Helpers\ErrorHelper;
+use Phortugol\NativeFunctions\Instance;
 use Phortugol\NativeFunctions\PhortugolFunction;
 use Phortugol\Token;
 
@@ -224,7 +229,35 @@ class ExprInterpreter
         throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no array");
     }
 
-    private function lookupVariable(Token $name, VarExpr $expr): mixed
+    protected function handleGetExpr(GetExpr $expr): mixed
+    {
+        $object = $this->evaluate($expr->object);
+        // Caso o meu objeto seja algo que implemente o contrato instancia, eu retorno isso.
+        if ($object instanceof Instance) {
+            return $object->get($expr->name);
+        }
+
+        throw new RuntimeError($expr->name, "Somente objetos têm propriedades.");
+    }
+
+    protected function handleSetExpr(SetExpr $expr): mixed
+    {
+        $object = $this->evaluate($expr->object);
+        if (!($object instanceof Instance)) {
+            throw new RuntimeError($expr->name, "Somente objetos têm propriedades");
+        }
+
+        $value = $this->evaluate($expr->value);
+        $object->set($expr->name, $value);
+        return $value;
+    }
+
+    protected function handleThisExpr(ThisExpr $expr): mixed
+    {
+        return $this->lookupVariable($expr->keyword, $expr);
+    }
+
+    private function lookupVariable(Token $name, Expr $expr): mixed
     {
         $distance = $this->interpreter->locals->get($expr, null);
         if ($distance !== null) {
