@@ -6,6 +6,7 @@ use Phortugol\Enums\TokenType;
 use Phortugol\Expr\ArrayDefExpr;
 use Phortugol\Expr\ArrayGetExpr;
 use Phortugol\Expr\CallExpr;
+use Phortugol\Expr\GetExpr;
 use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\AssignExpr;
@@ -14,6 +15,8 @@ use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LogicalExpr;
+use Phortugol\Expr\SetExpr;
+use Phortugol\Expr\ThisExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Stmt\ReturnStmt;
@@ -104,6 +107,8 @@ class ExprParser
 
             if ($expr instanceof VarExpr) {
                 return new AssignExpr($expr->name, $assignment);
+            } else if ($expr instanceof GetExpr) {
+                return new SetExpr($expr->object, $expr->name, $assignment);
             }
 
             $this->helper->error($equals, "Esperado uma variável antes do '='");
@@ -225,6 +230,9 @@ class ExprParser
         while (true) {
             if ($this->helper->match(TokenType::LEFT_PAREN)) {
                 $expr = $this->finishCall($expr);
+            } else if ($this->helper->match(TokenType::DOT)) {
+                $name = $this->helper->validate(TokenType::IDENTIFIER, "É esperado o nome da propriedade após acessar um objeto com '.'");
+                $expr = new GetExpr($expr, $name);
             } else {
                 break;
             }
@@ -303,6 +311,7 @@ class ExprParser
         if ($this->helper->match(TokenType::TRUE)) return new LiteralExpr(true);
         if ($this->helper->match(TokenType::NULL)) return new LiteralExpr(null);
         if ($this->helper->match(TokenType::NL)) return new LiteralExpr("\n");
+        if ($this->helper->match(TokenType::THIS)) return new ThisExpr($this->helper->previous());
 
         if ($this->helper->match(TokenType::NUMBER, TokenType::STRING)) {
             return new LiteralExpr($this->helper->previous()->literal);

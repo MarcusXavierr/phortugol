@@ -8,10 +8,13 @@ use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\Expr;
+use Phortugol\Expr\GetExpr;
 use Phortugol\Expr\GroupingExpr;
 use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Expr\LogicalExpr;
+use Phortugol\Expr\SetExpr;
+use Phortugol\Expr\ThisExpr;
 use Phortugol\Expr\UnaryExpr;
 use Phortugol\Expr\ConditionalExpr;
 use Phortugol\Expr\VarExpr;
@@ -19,6 +22,7 @@ use Phortugol\Parser\Parser;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\BreakStmt;
+use Phortugol\Stmt\ClassDecl;
 use Phortugol\Stmt\ContinueStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\FunctionStmt;
@@ -629,6 +633,57 @@ class ParserTest extends TestCase
                             )
                         ]
                     )
+                )
+            ],
+            "should parse a simple class declaration" => [
+                "tokens" => [
+                    token('classe'),
+                    token(TokenType::IDENTIFIER, 'Person'),
+                    token('{'),
+                    token('}')
+                ],
+                "expected" => new ClassDecl(
+                    token(TokenType::IDENTIFIER, 'Person'),
+                    []
+                )
+            ],
+            "should parse a class declaration with a constructor" => [
+                "tokens" => [
+                    token('classe'),
+                    token(TokenType::IDENTIFIER, 'Person'),
+                    token('{'),
+                    token(TokenType::IDENTIFIER, 'init'),
+                    token('('),
+                    token(TokenType::IDENTIFIER, 'nome'),
+                    token(')'),
+                    token('{'),
+                    token('meu'),
+                    token('.'),
+                    token(TokenType::IDENTIFIER, 'nome'),
+                    token('='),
+                    token(TokenType::IDENTIFIER, 'nome'),
+                    token('}'),
+                    token('}')
+                ],
+                "expected" => new ClassDecl(
+                    token(TokenType::IDENTIFIER, 'Person'),
+                    [
+                        new FunctionStmt(
+                            token(TokenType::IDENTIFIER, 'init'),
+                            [ token(TokenType::IDENTIFIER, 'nome') ],
+                            [
+                                new ExpressionStmt(
+                                    new SetExpr(
+                                        new ThisExpr(
+                                            token('meu')
+                                        ),
+                                        token(TokenType::IDENTIFIER, 'nome'),
+                                        new VarExpr(token(TokenType::IDENTIFIER, 'nome'))
+                                    )
+                                )
+                            ]
+                        )
+                    ]
                 )
             ],
         ];

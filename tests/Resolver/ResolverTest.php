@@ -99,6 +99,18 @@ class ResolverTest extends TestCase
 
         $this->assertTrue($this->errorHelper->hadError);
     }
+
+    // TODO: Testar isso
+    public function _CannotCallInitOutsideClass(): void
+    {
+        // test code
+    }
+
+    // TODO: Testar isso
+    public function _CannotReturnValueFromConstructor(): void
+    {
+        // test code
+    }
 }
 
 function newVar(string $name): VarExpr

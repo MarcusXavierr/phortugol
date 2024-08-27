@@ -2,6 +2,7 @@
 
 namespace Phortugol\NativeFunctions;
 
+use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\ReturnException;
 use Phortugol\Expr\LambdaExpr;
 use Phortugol\Interpreter\Environment;
@@ -14,10 +15,12 @@ class PhortugolFunction implements PhortCallable, Stringable
 {
     private readonly FunctionStmt|LambdaExpr $declaration;
     private readonly Environment $closure;
+    private readonly bool $isInitializer;
 
-    public function __construct(FunctionStmt|LambdaExpr $declaration, Environment $closure){
+    public function __construct(FunctionStmt|LambdaExpr $declaration, Environment $closure, bool $isInitializer = false){
         $this->declaration = $declaration;
         $this->closure = $closure;
+        $this->isInitializer = $isInitializer;
     }
 
     public function call(Interpreter $interpreter, array $arguments): mixed
@@ -31,7 +34,15 @@ class PhortugolFunction implements PhortCallable, Stringable
         try {
             $interpreter->executeBlock($this->declaration->body, $environment);
         } catch(ReturnException $returnValue) {
+            if ($this->isInitializer) {
+                return $this->closure->getAt(0, TokenType::THIS->value);
+            }
+
             return $returnValue->value;
+        }
+
+        if ($this->isInitializer) {
+            return $this->closure->getAt(0, TokenType::THIS->value);
         }
         return null;
     }
@@ -48,5 +59,12 @@ class PhortugolFunction implements PhortCallable, Stringable
         }
 
         return "<fn " . $this->declaration->name->lexeme . ">" ;
+    }
+
+    public function bind(Instance $instance): PhortugolFunction
+    {
+        $environment = new Environment($this->closure);
+        $environment->define(TokenType::THIS->value, $instance);
+        return new PhortugolFunction($this->declaration, $environment);
     }
 }

@@ -6,4 +6,6 @@ enum FunctionType
 {
     case NONE;
     case FUNCTION;
+    case INITIALIZER;
+    case METHOD;
 }

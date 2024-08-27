@@ -1,0 +1,32 @@
+classe Banco {
+    init(saldo) {
+        meu.dindin = saldo;
+    }
+
+    saldo() {
+       escreva "Você tem: " + meu.dindin + "\n";
+    }
+
+    depositar(valor) {
+        meu.dindin = meu.dindin + valor;
+    }
+
+    sacar(valor) {
+        se (valor > meu.dindin) {
+            escreva "você é pobre \n";
+            retorne 0;
+        }
+
+        meu.dindin = meu.dindin - valor;
+        retorne valor;
+    }
+}
+
+var roxinho = Banco(0);
+roxinho.depositar(100);
+roxinho.saldo();
+
+roxinho.sacar(30);
+roxinho.saldo();
+
+roxinho.sacar(1000000);

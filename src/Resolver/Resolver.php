@@ -4,11 +4,15 @@ namespace Phortugol\Resolver;
 
 use Ds\Map;
 use Ds\Stack;
+use Phortugol\Enums\TokenType;
 use Phortugol\Expr\ArrayDefExpr;
 use Phortugol\Expr\ArrayGetExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\ExprHandler;
+use Phortugol\Expr\GetExpr;
+use Phortugol\Expr\SetExpr;
+use Phortugol\Expr\ThisExpr;
 use Phortugol\Expr\VarExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\UnaryExpr;
@@ -21,6 +25,7 @@ use Phortugol\Expr\LambdaExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Interpreter\Interpreter;
 use Phortugol\Stmt\BlockStmt;
+use Phortugol\Stmt\ClassDecl;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\FunctionStmt;
 use Phortugol\Stmt\IfStmt;
@@ -40,10 +45,12 @@ class Resolver
     /** @use ExprHandler<void> */
     use ExprHandler;
 
+    /** @var Stack<Map> $scopes */
     private readonly Stack $scopes;
     private readonly Interpreter $interpreter;
     private readonly ErrorHelper $errorHelper;
     private FunctionType $currentFunction;
+    private ClassType $currentClass;
 
     public function __construct(Interpreter $interpreter, ErrorHelper $error)
     {
@@ -51,6 +58,7 @@ class Resolver
         $this->errorHelper = $error;
         $this->scopes = new Stack();
         $this->currentFunction = FunctionType::NONE;
+        $this->currentClass = ClassType::NONE;
     }
 
     protected function handleBlockStmt(BlockStmt $stmt): void
@@ -221,9 +229,35 @@ class Resolver
         if ($this->currentFunction == FunctionType::NONE) {
             $this->errorHelper->error($stmt->keyword, "Não é possível usar esse comando fora de uma função");
         }
+
         if ($stmt->value) {
+            if ($this->currentFunction == FunctionType::INITIALIZER) {
+                $this->errorHelper->error($stmt->keyword, "Não é possível retornar valor de um construtor");
+            }
+
             $this->resolveExpr($stmt->value);
         }
+    }
+
+    protected function handleClassDecl(ClassDecl $stmt): void
+    {
+        $ensclosingClass = $this->currentClass;
+        $this->currentClass = ClassType::PHORTCLASS;
+
+        $this->declare($stmt->name->lexeme);
+        $this->define($stmt->name->lexeme);
+
+        $this->beginScope();
+        $this->scopes->peek()->put(TokenType::THIS->value, true);
+
+        foreach ($stmt->body as $method) {
+            /** @var FunctionStmt $method */
+            $isInitializer = $method->name->lexeme == TokenType::CONSTRUCTOR->value;
+            $this->resolveFunction($method, $isInitializer ? FunctionType::INITIALIZER : FunctionType::METHOD);
+        }
+
+        $this->endScope();
+        $this->currentClass = $ensclosingClass;
     }
 
     // Now, expressions
@@ -299,5 +333,24 @@ class Resolver
     {
         $this->resolveExpr($expr->array);
         $this->resolveExpr($expr->index);
+    }
+
+    protected function handleGetExpr(GetExpr $expr): void
+    {
+        $this->resolveExpr($expr->object);
+    }
+
+    protected function handleSetExpr(SetExpr $expr): void
+    {
+        $this->resolveExpr($expr->value);
+        $this->resolveExpr($expr->object);
+    }
+
+    protected function handleThisExpr(ThisExpr $expr): void
+    {
+        if ($this->currentClass == ClassType::NONE) {
+            $this->errorHelper->error($expr->keyword, "Não é possível usar o esse operador fora de uma classe");
+        }
+        $this->resolveLocal($expr, $expr->keyword);
     }
 }

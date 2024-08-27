@@ -4,11 +4,11 @@ namespace Phortugol\Parser;
 
 use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\ParserError;
-use Phortugol\Expr\LambdaExpr;
 use Phortugol\Expr\LiteralExpr;
 use Phortugol\Helpers\ErrorHelper;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\BreakStmt;
+use Phortugol\Stmt\ClassDecl;
 use Phortugol\Stmt\ContinueStmt;
 use Phortugol\Stmt\ExpressionStmt;
 use Phortugol\Stmt\FunctionStmt;
@@ -56,12 +56,41 @@ class Parser
     {
         try {
             if ($this->helper->match(TokenType::VAR)) return $this->varDeclaration();
+            if ($this->helper->match(TokenType::FUNCTION)) return $this->function('função');
+            if ($this->helper->match(TokenType::PCLASS)) return $this->classDecl();
 
             return $this->statement();
         } catch (ParserError $e) {
             $this->helper->sincronize();
             return null;
         }
+    }
+
+    private function varDeclaration(): Stmt
+    {
+        $identifier = $this->helper->validate(TokenType::IDENTIFIER, "Necessário dar um nome para a sua variável");
+        $initializer = null;
+        if ($this->helper->match(TokenType::EQUAL)) {
+            $initializer = $this->exprParser->expression();
+        }
+
+        $this->helper->validateSemicolon($initializer, "Esperado um ';' após declarar uma variavel");
+        return new VarStmt($identifier->lexeme, $initializer);
+    }
+
+    private function classDecl(): Stmt
+    {
+        $identifier = $this->helper->validate(TokenType::IDENTIFIER, "Necessário dar um nome para a sua classe");
+        $this->helper->validate(TokenType::LEFT_BRACE, "Esperado um '{' na sua classe");
+        $methods = [];
+        while (!$this->helper->check(TokenType::RIGHT_BRACE) && !$this->helper->isAtEnd()) {
+            $function = $this->function("método");
+            array_push($methods, $function);
+        }
+
+        $this->helper->validate(TokenType::RIGHT_BRACE, "É esperado um '}' no final da classe");
+
+        return new ClassDecl($identifier, $methods);
     }
 
     private function statement(): Stmt
@@ -73,7 +102,6 @@ class Parser
         if ($this->helper->match(TokenType::FOR)) return $this->forStmt();
         if ($this->helper->match(TokenType::BREAK)) return $this->breakStmt();
         if ($this->helper->match(TokenType::CONTINUE)) return $this->continueStmt();
-        if ($this->helper->match(TokenType::FUNCTION)) return $this->function('função');
         if ($this->helper->match(TokenType::RETURN)) return $this->returnStmt();
 
         return $this->expressionStmt();
@@ -91,18 +119,6 @@ class Parser
 
         $this->helper->validate(TokenType::RIGHT_BRACE, "Esperado '}' no fim de um bloco");
         return $declarations;
-    }
-
-    private function varDeclaration(): Stmt
-    {
-        $identifier = $this->helper->validate(TokenType::IDENTIFIER, "Necessário dar um nome para a sua variável");
-        $initializer = null;
-        if ($this->helper->match(TokenType::EQUAL)) {
-            $initializer = $this->exprParser->expression();
-        }
-
-        $this->helper->validateSemicolon($initializer, "Esperado um ';' após declarar uma variavel");
-        return new VarStmt($identifier->lexeme, $initializer);
     }
 
     private function expressionStmt(): Stmt

@@ -25,6 +25,8 @@ class ScannerKeywords
         'continue' => TokenType::CONTINUE,
         'escreva' => TokenType::PRINT,
         'senão' => TokenType::ELSE,
+        'classe' => TokenType::PCLASS,
+        'this' => TokenType::THIS,
         // 'let' => TokenType::LET,
         // 'const' => TokenType::CONST,
     ];
