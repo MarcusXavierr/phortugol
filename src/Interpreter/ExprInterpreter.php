@@ -7,6 +7,7 @@ use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\ArrayDefExpr;
 use Phortugol\Expr\ArrayGetExpr;
+use Phortugol\Expr\ArraySetExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\CallExpr;
@@ -227,6 +228,24 @@ class ExprInterpreter
         }
 
         throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no array");
+    }
+
+    protected function handleArraySetExpr(ArraySetExpr $expr): mixed
+    {
+        $array = $this->evaluate($expr->array);
+        $index = $this->evaluate($expr->index);
+
+        if (!($array instanceof Map)) {
+            throw new RuntimeError($expr->bracket, "Variável não é um array");
+        }
+
+        if (!is_scalar($index)) {
+            throw new RuntimeError($expr->bracket, "Índices de arrays só podem ser números ou strings");
+        }
+
+        $array->put((string)$index, $this->evaluate($expr->assignment));
+
+        return $array;
     }
 
     protected function handleGetExpr(GetExpr $expr): mixed

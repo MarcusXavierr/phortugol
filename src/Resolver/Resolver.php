@@ -7,6 +7,7 @@ use Ds\Stack;
 use Phortugol\Enums\TokenType;
 use Phortugol\Expr\ArrayDefExpr;
 use Phortugol\Expr\ArrayGetExpr;
+use Phortugol\Expr\ArraySetExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\Expr;
 use Phortugol\Expr\ExprHandler;
@@ -333,6 +334,13 @@ class Resolver
     {
         $this->resolveExpr($expr->array);
         $this->resolveExpr($expr->index);
+    }
+
+    protected function handleArraySetExpr(ArraySetExpr $expr): void
+    {
+        $this->resolveExpr($expr->array);
+        $this->resolveExpr($expr->index);
+        $this->resolveExpr($expr->assignment);
     }
 
     protected function handleGetExpr(GetExpr $expr): void
