@@ -5,6 +5,7 @@ namespace Phortugol\Parser;
 use Phortugol\Enums\TokenType;
 use Phortugol\Expr\ArrayDefExpr;
 use Phortugol\Expr\ArrayGetExpr;
+use Phortugol\Expr\ArraySetExpr;
 use Phortugol\Expr\CallExpr;
 use Phortugol\Expr\GetExpr;
 use Phortugol\Expr\LambdaExpr;
@@ -109,6 +110,8 @@ class ExprParser
                 return new AssignExpr($expr->name, $assignment);
             } else if ($expr instanceof GetExpr) {
                 return new SetExpr($expr->object, $expr->name, $assignment);
+            } else if ($expr instanceof ArrayGetExpr) {
+                return new ArraySetExpr($expr->bracket, $expr->array, $expr->index, $assignment);
             }
 
             $this->helper->error($equals, "Esperado uma variável antes do '='");
@@ -225,14 +228,19 @@ class ExprParser
 
     private function call(): Expr
     {
-        $expr = $this->arrayGet();
+        $expr = $this->arrayDef();
 
         while (true) {
             if ($this->helper->match(TokenType::LEFT_PAREN)) {
                 $expr = $this->finishCall($expr);
-            } else if ($this->helper->match(TokenType::DOT)) {
+            } else if ($this->helper->match(TokenType::DOT)) { // Parse object attribute call
                 $name = $this->helper->validate(TokenType::IDENTIFIER, "É esperado o nome da propriedade após acessar um objeto com '.'");
                 $expr = new GetExpr($expr, $name);
+            } else if ($this->helper->match(TokenType::LEFT_BRACKET)) { // Parse array get
+                $token = $this->helper->previous();
+                $index = $this->expression();
+                $this->helper->validate(TokenType::RIGHT_BRACKET, "É esperado um '[' no fim do array");
+                return new ArrayGetExpr($token, $expr, $index);
             } else {
                 break;
             }
@@ -257,39 +265,9 @@ class ExprParser
         return new CallExpr($callee, $paren, $arguments);
     }
 
-    // TODO: solve the problem of getting value from an array returned from a function call `var a = (x) => [x,x,x]; a(10)[0];` breaks
-    private function arrayGet(): Expr
-    {
-        $expr = $this->arrayDef();
-        while (true) {
-            if ($this->helper->match(TokenType::LEFT_BRACKET)) {
-                $expr = $this->finishArray($expr);
-            } else {
-                break;
-            }
-        }
-
-        return $expr;
-    }
-
-    private function finishArray(Expr $array): Expr
-    {
-        if ($this->helper->check(TokenType::RIGHT_BRACKET)) {
-            $this->helper->error($this->helper->peek(), "É esperado uma expressão para trazer o índice do item a ser buscado");
-        }
-
-        $index = $this->expression();
-        $bracket = $this->helper->validate(TokenType::RIGHT_BRACKET, "É esperado um ']' no fim de uma leitura na lista");
-        return new ArrayGetExpr($bracket, $array, $index);
-    }
-
     private function arrayDef(): Expr
     {
         if (!$this->helper->check(TokenType::LEFT_BRACKET)) {
-            return $this->primary();
-        }
-
-        if ($this->helper->previous()->kind == TokenType::RIGHT_BRACKET) {
             return $this->primary();
         }
 
@@ -329,6 +307,7 @@ class ExprParser
         }
 
 
+        echo 'oi';
         throw $this->helper->error($this->helper->peek(), "Espera uma expressão.");
     }
 }
