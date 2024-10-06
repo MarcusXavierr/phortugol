@@ -33,7 +33,7 @@ composer test
 - [x] Suportar closures
 - [x] Melhorar o escopo estático
 - [x] Implementar suporte a arrays
-- [ ] Implementar classes
+- [x] Implementar classes
 - [ ] Criar uma página para documentar a sintaxe da linguagem
 - [ ] Publicar a extensão para VS Code que adiciona syntax highlight em arquivos `.port`
 - [ ] Implementar alguma função para tornar o programa capaz de ler input do usuário
