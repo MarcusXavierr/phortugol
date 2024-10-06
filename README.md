@@ -48,58 +48,61 @@ composer test
 ## Notação da "gramática" de phortugol
 Ainda não está totalmente finalizada, e talvez no futuro eu migre pra uma notação EBNF. A tendência é as regras com precedência mais alta ficarem mais no fundo do arquivo. Começamos com statements, e depois vamos pra expressions.
 
-```
-program -> declaration* EOF;
+```bnf
+program      -> declaration* EOF;
 
 // stmts
-declaration -> funcDecl | varDecl | statement;
-funcDecl -> ("função" | "funcao" ) function;
-function -> IDENTIFIER "(" parameters? ")" block;
-parameters -> IDENTIFIER ( "," IDENTIFIER)*;
+declaration  -> funcDecl | varDecl | statement | classDecl;
 
-varDecl -> "var" IDENTIFIER ("=" expression)? ";"
+funcDecl     -> ("função" | "funcao") function;
+function     -> IDENTIFIER "(" parameters? ")" block;
+parameters   -> IDENTIFIER ("," IDENTIFIER)*;
+varDecl      -> "var" IDENTIFIER ("=" expression)? ";";
+classDecl    -> "classe" IDENTIFIER "{" function* "}";
 
-statement ->  exprStmt
-			| printStmt
-			| block
-			| ifStmt
-			| whileStmt
-			| forStmt
-			| returnStmt
+statement    -> exprStmt 
+             | printStmt
+             | block
+             | ifStmt
+             | whileStmt
+             | forStmt
+             | returnStmt;
 
-exprStmt -> expression ";" ;
-printStmt -> "escreva" expression ";" ;
-block -> "{" declaration* "}";
-ifStmt -> "se" "(" expression ")" statement ("senao" statement)? ;
-whileStmt -> "enquanto" "(" expression ")" statement;
-forStmt -> "repetir" "("
-			(varDecl | exprStmt)? ";"
-			expression? ";"
-			expression? ")" statement;
-returnStmt -> "retorne" expression? ";" ;
+exprStmt     -> expression ";";
+printStmt    -> "escreva" expression ";";
+block        -> "{" declaration* "}";
+ifStmt       -> "se" "(" expression ")" statement ("senao" statement)?;
+whileStmt    -> "enquanto" "(" expression ")" statement;
+forStmt      -> "repetir" "(" 
+             (varDecl | exprStmt)? ";"
+             expression? ";"
+             expression? ")" statement;
+returnStmt   -> "retorne" expression? ";";
 
 // Expressions
-expression     → lambda ;
-lambda        -> "(" parameters? ")" "=>" (block | expression)
-                 | assignment;
+expression   -> lambda;
+lambda       -> "(" parameters? ")" "=>" (block | expression)
+             | assignment;
 
-assignment -> IDENTIFIER "=" assignment
-			 | conditional;
+assignment   -> (call ".")? IDENTIFIER "=" assignment
+             | call "[" expression "]" "=" assignment
+             | conditional;
 
-conditional   -> logic_or ("?" expression ":" conditional)?;
-logic_or       → logic_and ( "OU" logic_and )* ;
-logic_and      → equality ( "E" equality )* ;
-equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-term           → factor ( ( "-" | "+" ) factor )* ;
-factor         → unary ( ( "/" | "*" | "%" ) unary )* ;
-unary          → ( "!" | "-" ) unary
-               | call ;
-call           -> arrayGet ( "(" arguments? ")" )*;
-arrayGet       -> arrayDef ( "[" (expression) "]" )*
-arrayDef      -> "[" (expression)? ("," expression)* "]";
-               | primary;
-primary        → NUMBER | STRING | "verdadeiro" | "falso" | "nulo" | "NL"
-               | "(" expression ")" ;
-arguments      -> expression ("," expression)*;
+conditional  -> logic_or ("?" expression ":" conditional)?;
+logic_or     -> logic_and ("OU" logic_and)*;
+logic_and    -> equality ("E" equality)*;
+equality     -> comparison (("!=" | "==") comparison)*;
+comparison   -> term ((">" | ">=" | "<" | "<=") term)*;
+term         -> factor (("-" | "+") factor)*;
+factor       -> unary (("/" | "*" | "%") unary)*;
+unary        -> ("!" | "-") unary
+             | call;
+call         -> primary ("(" arguments? ")" | "." IDENTIFIER | arrayGet)*;
+arrayGet     -> "[" expression "]";
+primary      -> NUMBER | STRING | "true" | "false" | "nil"
+             | arrayDef
+             | "(" expression ")";
+arrayDef     -> "[" (expression)? ("," expression)* "]";
+arguments    -> expression ("," expression)*;
+
 ```
