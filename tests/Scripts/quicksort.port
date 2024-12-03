@@ -50,6 +50,9 @@ escreva "Quicksort em portugol" + NL;
 var arr = lerArray();
 var resultado = quicksort(arr);
 
+escreva "Entrada: " + NL;
+escreva arr;
+escreva NL;
 escreva "Resultado: " + NL;
 escreva resultado;
 escreva NL;

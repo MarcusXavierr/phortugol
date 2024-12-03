@@ -7,9 +7,10 @@ função fibonacci(n) {
 
 var now = relogio();
 
-repita (var i = 1; i < 25; i++) {
-    escreva fibonacci(i);
-}
+// repita (var i = 1; i < 25; i++) {
+    //escreva fibonacci(i);
+//}
 
+escreva "fibonacci(25) = " + fibonacci(30);
 
 escreva "se passaram " + (relogio() - now) + " segundos";

@@ -1,0 +1,14 @@
+var u = leia();
+// var u = 100;
+var r = intAleatório(0, 1000);
+var a = vetor(10000, 0);
+escreva 'gerei o vetor';
+repita (var i = 0; i < 1000; i++) {
+    var x = a[i];
+    repita (var j = 0; j < 10000; j++) {
+        x = x + (j % u);
+    }
+    a[i] = x + r;
+}
+
+escreva a[r] + "\n";

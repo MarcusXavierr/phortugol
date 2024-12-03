@@ -26,7 +26,7 @@ repita (var i = 1; i < 70; i++) {
     //escreva memoizedComputation(i) + NL;
 }
 
-escreva "fibonacci(65) = " + fibonacci(65) + NL;
+escreva "fibonacci(30) = " + fibonacci(25) + NL;
 
 
 //escreva "se passaram " + (relogio() - now) + " segundos" + NL;
