@@ -9,5 +9,5 @@ interface PhortCallable
      */
     public function call(Interpreter $interpreter, array $arguments): mixed;
 
-    public function arity(): int;
+    public function arity(): int|array;
 }

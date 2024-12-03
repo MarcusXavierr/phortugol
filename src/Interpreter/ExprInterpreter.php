@@ -181,9 +181,15 @@ class ExprInterpreter
 
         if ($callee instanceof PhortCallable) {
             $countArguments = count($arguments);
-            if ($countArguments != $callee->arity()) {
-                throw new RuntimeError($expr->paren, "Experado {$callee->arity()} argumentos, mas recebi {$countArguments} argumento(s).");
+            if (!is_array($callee->arity()) && $countArguments != $callee->arity()) {
+                throw new RuntimeError($expr->paren, "Esperado {$callee->arity()} argumentos, mas recebi {$countArguments} argumento(s).");
             }
+
+            if (is_array($callee->arity()) && !in_array($countArguments, $callee->arity())) {
+                $args = implode(', ', $callee->arity());
+                throw new RuntimeError($expr->paren, "Esperado essas quantidades possíveis de argumentos {$args}, mas recebi {$countArguments} argumento(s).");
+            }
+
             return $callee->call($this->interpreter, $arguments);
         }
 
@@ -215,6 +221,18 @@ class ExprInterpreter
         $array = $this->evaluate($expr->array);
         $index = $this->evaluate($expr->index);
 
+        // echo "array instance of " . get_class($array) . "\n";
+        if ($array instanceof \SplFixedArray) {
+            if (!is_scalar($index)) {
+                throw new RuntimeError($expr->bracket, "Índices de vetores só podem ser números");
+            }
+
+            if ($index >= $array->getSize()) {
+                throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no vetor");
+            }
+            return $array[$index];
+        }
+
         if (!($array instanceof Map)) {
             throw new RuntimeError($expr->bracket, "Variável não é um array");
         }
@@ -234,6 +252,19 @@ class ExprInterpreter
     {
         $array = $this->evaluate($expr->array);
         $index = $this->evaluate($expr->index);
+
+        if ($array instanceof \SplFixedArray) {
+            if (!is_scalar($index)) {
+                throw new RuntimeError($expr->bracket, "Índices de vetores só podem ser números");
+            }
+
+            if ($index >= $array->getSize()) {
+                throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no vetor");
+            }
+
+            $array[$index] = $this->evaluate($expr->assignment);
+            return $array;
+        }
 
         if (!($array instanceof Map)) {
             throw new RuntimeError($expr->bracket, "Variável não é um array");
