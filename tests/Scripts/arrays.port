@@ -2,7 +2,7 @@ var lista = [];
 repita (var i = 0; i < 4; i++) {
     escreva "Escreva seu nome: ";
     var nome = leia();
-    inserir(lista, nome);
+    empilhar(lista, nome);
 }
 
 escreva "Olá, ";

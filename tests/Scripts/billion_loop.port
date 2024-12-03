@@ -1,0 +1,12 @@
+var u = leia();
+// var u = 100;
+var r = intAleatório(0, 1000);
+var a = preencherLista(1000, 0);
+repita (var i = 0; i < 1000; i++) {
+    repita (var j = 0; j < 1000; j++) {
+        a[i] = a[i] + (j % u);
+    }
+    a[i] = a[i] + r;
+}
+
+escreva a[r] + "\n";

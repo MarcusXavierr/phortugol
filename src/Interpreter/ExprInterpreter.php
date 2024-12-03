@@ -7,6 +7,7 @@ use Phortugol\Enums\TokenType;
 use Phortugol\Exceptions\RuntimeError;
 use Phortugol\Expr\ArrayDefExpr;
 use Phortugol\Expr\ArrayGetExpr;
+use Phortugol\Expr\ArraySetExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\CallExpr;
@@ -180,9 +181,15 @@ class ExprInterpreter
 
         if ($callee instanceof PhortCallable) {
             $countArguments = count($arguments);
-            if ($countArguments != $callee->arity()) {
-                throw new RuntimeError($expr->paren, "Experado {$callee->arity()} argumentos, mas recebi {$countArguments} argumento(s).");
+            if (!is_array($callee->arity()) && $countArguments != $callee->arity()) {
+                throw new RuntimeError($expr->paren, "Esperado {$callee->arity()} argumentos, mas recebi {$countArguments} argumento(s).");
             }
+
+            if (is_array($callee->arity()) && !in_array($countArguments, $callee->arity())) {
+                $args = implode(', ', $callee->arity());
+                throw new RuntimeError($expr->paren, "Esperado essas quantidades possíveis de argumentos {$args}, mas recebi {$countArguments} argumento(s).");
+            }
+
             return $callee->call($this->interpreter, $arguments);
         }
 
@@ -198,7 +205,12 @@ class ExprInterpreter
     {
         $elements = new Map();
         foreach ($expr->elements as $key => $element) {
-            $elements->put($key, $this->evaluate($element));
+            if (!is_scalar($key)) {
+                // INFO: Todas as chaves de arrays são convertidas para strings
+                throw new RuntimeError($expr->leftBracket, "Índices de arrays só podem ser números ou strings");
+            }
+
+            $elements->put((string)$key, $this->evaluate($element));
         }
 
         return $elements;
@@ -209,16 +221,62 @@ class ExprInterpreter
         $array = $this->evaluate($expr->array);
         $index = $this->evaluate($expr->index);
 
+        // echo "array instance of " . get_class($array) . "\n";
+        if ($array instanceof \SplFixedArray) {
+            if (!is_scalar($index)) {
+                throw new RuntimeError($expr->bracket, "Índices de vetores só podem ser números");
+            }
+
+            if ($index >= $array->getSize()) {
+                throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no vetor");
+            }
+            return $array[$index];
+        }
+
         if (!($array instanceof Map)) {
-            throw new RuntimeError($expr->name, "Variável não é um array");
+            throw new RuntimeError($expr->bracket, "Variável não é um array");
         }
 
-        // TODO: fazer funcionar sem o cast, pois vou lidar com outros tipos de indices quando implementar maps
-        if (!$array->hasKey((int)$index)) {
-            throw new RuntimeError($expr->name, "Acessando um índice inexistente no array");
+        if (!is_scalar($index)) {
+            throw new RuntimeError($expr->bracket, "Índices de arrays só podem ser números ou strings");
         }
 
-        return $array[(int)$index];
+        if ($array->hasKey((string)$index)) {
+            return $array[(string)$index];
+        }
+
+        throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no array");
+    }
+
+    protected function handleArraySetExpr(ArraySetExpr $expr): mixed
+    {
+        $array = $this->evaluate($expr->array);
+        $index = $this->evaluate($expr->index);
+
+        if ($array instanceof \SplFixedArray) {
+            if (!is_scalar($index)) {
+                throw new RuntimeError($expr->bracket, "Índices de vetores só podem ser números");
+            }
+
+            if ($index >= $array->getSize()) {
+                throw new RuntimeError($expr->bracket, "Acessando um índice inexistente no vetor");
+            }
+
+            $array[$index] = $this->evaluate($expr->assignment);
+            return $array;
+        }
+
+        if (!($array instanceof Map)) {
+            throw new RuntimeError($expr->bracket, "Variável não é um array");
+        }
+
+        if (!is_scalar($index)) {
+            throw new RuntimeError($expr->bracket, "Índices de arrays só podem ser números ou strings");
+        }
+
+        $array->put((string)$index, $this->evaluate($expr->assignment));
+
+        return $array;
     }
 
     protected function handleGetExpr(GetExpr $expr): mixed

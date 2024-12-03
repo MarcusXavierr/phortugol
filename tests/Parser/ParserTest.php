@@ -4,6 +4,8 @@ namespace Tests\Parser;
 
 use PHPUnit\Framework\TestCase;
 use Phortugol\Enums\TokenType;
+use Phortugol\Expr\ArrayGetExpr;
+use Phortugol\Expr\ArraySetExpr;
 use Phortugol\Expr\AssignExpr;
 use Phortugol\Expr\BinaryExpr;
 use Phortugol\Expr\CallExpr;
@@ -258,6 +260,22 @@ class ParserTest extends TestCase
                         token(TokenType::PLUS),
                         literal(2)
                     )
+                )
+            ],
+            "should parse a array set expr" => [
+                "tokens" => [
+                    token(TokenType::IDENTIFIER, 'x'),
+                    token('['),
+                    numToken(1),
+                    token(']'),
+                    token('='),
+                    numToken(2),
+                ],
+                "expected" => new ArraySetExpr(
+                    token('['),
+                    new VarExpr(token(TokenType::IDENTIFIER, 'x')),
+                    new LiteralExpr(1),
+                    new LiteralExpr(2),
                 )
             ]
         ];

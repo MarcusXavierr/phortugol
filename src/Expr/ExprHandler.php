@@ -27,6 +27,7 @@ trait ExprHandler
             $expr instanceof LambdaExpr => $this->handleLambdaExpr($expr),
             $expr instanceof ArrayDefExpr => $this->handleArrayDefExpr($expr),
             $expr instanceof ArrayGetExpr => $this->handleArrayGetExpr($expr),
+            $expr instanceof ArraySetExpr => $this->handleArraySetExpr($expr),
             $expr instanceof GetExpr => $this->handleGetExpr($expr),
             $expr instanceof SetExpr => $this->handleSetExpr($expr),
             $expr instanceof ThisExpr => $this->handleThisExpr($expr),
@@ -93,6 +94,11 @@ trait ExprHandler
      * @return T
      */
     protected abstract function handleArrayGetExpr(ArrayGetExpr $expr);
+
+    /**
+     * @return T
+     */
+    protected abstract function handleArraySetExpr(ArraySetExpr $expr);
 
     /**
      * @return T

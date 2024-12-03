@@ -5,7 +5,7 @@ função lerArray() {
     repita (var i = 0; i < n; i++) {
         escreva "Digite os elemento número " + (i + 1) + ": ";
         var x = leia();
-        inserir(arr, x);
+        empilhar(arr, x);
     }
 
     retorne arr;
@@ -22,9 +22,9 @@ função quicksort(arr) {
 
     repita (var i = 1; i < tamanho(arr); i++) {
         se (arr[i] < pivot) {
-            inserir(menor, arr[i]);
+            empilhar(menor, arr[i]);
         } senão {
-            inserir(maior, arr[i]);
+            empilhar(maior, arr[i]);
         }
     }
 
@@ -34,13 +34,13 @@ função quicksort(arr) {
 função concatenar(arr1, arr2, arr3) {
     var resultado = [];
     repita (var i = 0; i < tamanho(arr1); i++) {
-        inserir(resultado, arr1[i]);
+        empilhar(resultado, arr1[i]);
     }
     repita (var i = 0; i < tamanho(arr2); i++) {
-        inserir(resultado, arr2[i]);
+        empilhar(resultado, arr2[i]);
     }
     repita (var i = 0; i < tamanho(arr3); i++) {
-        inserir(resultado, arr3[i]);
+        empilhar(resultado, arr3[i]);
     }
     retorne resultado;
 }
@@ -50,6 +50,9 @@ escreva "Quicksort em portugol" + NL;
 var arr = lerArray();
 var resultado = quicksort(arr);
 
+escreva "Entrada: " + NL;
+escreva arr;
+escreva NL;
 escreva "Resultado: " + NL;
 escreva resultado;
 escreva NL;
