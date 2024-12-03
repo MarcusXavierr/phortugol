@@ -14,10 +14,13 @@ use Phortugol\NativeFunctions\ArrayInsert;
 use Phortugol\NativeFunctions\ArraySize;
 use Phortugol\NativeFunctions\ArrayPush;
 use Phortugol\NativeFunctions\Clock;
+use Phortugol\NativeFunctions\FillArray;
 use Phortugol\NativeFunctions\KeyExists;
+use Phortugol\NativeFunctions\NewVector;
 use Phortugol\NativeFunctions\PhortClass;
 use Phortugol\NativeFunctions\PhortugolFunction;
 use Phortugol\NativeFunctions\Pow;
+use Phortugol\NativeFunctions\Random;
 use Phortugol\NativeFunctions\Read;
 use Phortugol\Stmt\BlockStmt;
 use Phortugol\Stmt\ClassDecl;
@@ -30,6 +33,7 @@ use Phortugol\Stmt\Stmt;
 use Phortugol\Stmt\StmtHandler;
 use Phortugol\Stmt\VarStmt;
 use Phortugol\Stmt\WhileStmt;
+use Stringable;
 
 class Interpreter
 {
@@ -88,6 +92,9 @@ class Interpreter
         } else if ($result === false) {
             echo "falso";
         } else if ($result instanceof Map) {
+            printArray($result);
+        }
+        else if ($result instanceof \SplFixedArray) {
             printArray($result);
         }
         else if (gettype($result) === "string") {
@@ -224,11 +231,15 @@ class Interpreter
         $this->globals->define("empilhar", new ArrayPush());
         $this->globals->define("inserir", new ArrayInsert());
         $this->globals->define("temChave", new KeyExists());
+        $this->globals->define("intAleatório", new Random());
+        $this->globals->define("intAleatorio", new Random());
+        $this->globals->define("preencherLista", new FillArray());
+        $this->globals->define("vetor", new NewVector());
     }
 }
 
 // TODO: Refactor later
-function printArray(Map $arr): void
+function printArray(\SplFixedArray|Map $arr): void
 {
     $isAssoc = false;
     $i = 0;
